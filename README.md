@@ -5,12 +5,24 @@ Portfish - .Net port of Stockfish (UCI chess engine)
 
 Latest versions could be downloaded from: https://github.com/downloads/bpfliegel/Portfish/PortfishLatestRelease.zip
 
-1. Introduction
+0. Introduction
 ---------------
 
-Portfish is the .Net port of Stockfish, up to the version around late April (post 2.2.2) currently.
+Portfish is the .Net port of Stockfish, functionally equal to Stockfish 2012 may 1, commit 2f47844c7c.
 All features of the original version are present, except search and debug logging is stripped.
 The fastest builds are 4.0 x64 and 4.5 beta x64.
+
+
+1. Motivation
+---------------
+
+Portfish was created to serve as a free and powerful chess engine for platforms that does not support
+or have only limited support for C engines - e.g. Silverlight and Windows Phone.
+It is/was also motivated to see what performance ratio is achievable after conversion, it is obviously
+a lot slower than the original Stockfish. Ratio should be around 1:2,7 when running on a Windows desktop
+and more when running on Linux with Mono support.
+Portfish is not meant to be a clone or competitor of Stockfish in any way.
+
 
 2. Files
 --------
@@ -25,6 +37,7 @@ This distribution of Portfish consists of the following files:
   * src/, a subdirectory containing the full source code.
     For further information about how to compile Portfish yourself
     read section 4 below.
+
 
 3. Opening books
 ----------------
@@ -64,6 +77,7 @@ d) 'Optimize code' checkbox...
 e) For mobile platforms one should create an IPlug implementation to be able
 to communicate through UCI and launch the engine in the same way as presented
 in Program.cs.
+
 
 5. Terms of use
 ---------------
