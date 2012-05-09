@@ -437,9 +437,9 @@ namespace Portfish
 
             // Best move could be MOVE_NONE when searching on a stalemate position
             Plug.Interface.Write("bestmove ");
-            Plug.Interface.Write(Utils.move_to_uci(RootMoves[0].pv[0], Chess960));
+            Plug.Interface.Write(Utils.move_to_uci(pos.sideToMove, RootMoves[0].pv[0], Chess960));
             Plug.Interface.Write(" ponder ");
-            Plug.Interface.Write(Utils.move_to_uci(RootMoves[0].pv[1], Chess960));
+            Plug.Interface.Write(Utils.move_to_uci(pos.sideToMove ^ 1, RootMoves[0].pv[1], Chess960));
             Plug.Interface.Write(Constants.endl);
         }
 
@@ -1004,7 +1004,7 @@ namespace Portfish
                         Plug.Interface.Write("info depth ");
                         Plug.Interface.Write((depth / DepthC.ONE_PLY).ToString());
                         Plug.Interface.Write(" currmove ");
-                        Plug.Interface.Write(Utils.move_to_uci(move, Chess960));
+                        Plug.Interface.Write(Utils.move_to_uci(ColorC.BLACK, move, Chess960));
                         Plug.Interface.Write(" nodes ");
                         Plug.Interface.Write(pos.nodes.ToString());
                         Plug.Interface.Write(" currmovenumber ");
@@ -1716,7 +1716,7 @@ namespace Portfish
 
                 for (int j = 0; RootMoves[i].pv[j] != MoveC.MOVE_NONE; j++)
                 {
-                    s.Append(" ").Append(Utils.move_to_uci(RootMoves[i].pv[j], Chess960));
+                    s.Append(" ").Append(Utils.move_to_uci(ColorC.BLACK, RootMoves[i].pv[j], Chess960));
                 }
 
                 Plug.Interface.Write("info depth ");
