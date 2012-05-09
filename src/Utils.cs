@@ -1069,7 +1069,7 @@ namespace Portfish
         /// (g1f3, a7a8q, etc.). The only special case is castling moves, where we
         /// print in the e1g1 notation in normal chess mode, and in e1h1 notation in
         /// Chess960 mode. Instead internally Move is coded as "king captures rook".
-        internal static string move_to_uci(Color c, Move m, bool chess960)
+        internal static string move_to_uci(Move m, bool chess960)
         {
             Square from = from_sq(m);
             Square to = to_sq(m);
@@ -1085,13 +1085,7 @@ namespace Portfish
                 to = from + (file_of(to) == FileC.FILE_H ? 2 : -2);
 
             if (is_promotion(m))
-            {
-                promotion = piece_type_to_char(promotion_type(m)).ToString();
-                if (c == ColorC.BLACK)
-                {
-                    promotion = promotion.ToLowerInvariant();
-                }
-            }
+                promotion = tolower(piece_type_to_char(promotion_type(m))).ToString();
 
             return string.Concat(square_to_string(from), square_to_string(to), promotion);
         }
@@ -1105,7 +1099,7 @@ namespace Portfish
             Movegen.generate(MoveType.MV_LEGAL, pos, mlist.moves, ref mlist.pos);
             for (int i = 0; i < mlist.pos; i++)
             {
-                if (str == Utils.move_to_uci(ColorC.BLACK, mlist.moves[i].move, pos.chess960))
+                if (str == Utils.move_to_uci(mlist.moves[i].move, pos.chess960))
                 {
                     Move retval = mlist.moves[i].move;
                     MListBroker.Free(mlist);
