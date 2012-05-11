@@ -1095,11 +1095,12 @@ namespace Portfish
         /// Moves are guaranteed to be legal.
         internal static Move move_from_uci(Position pos, string str)
         {
+            string strLowerPromotion = (str.Length == 5 ? str.Substring(0, 4) + str.Substring(4).ToLowerInvariant() : str);
             MList mlist = MListBroker.GetObject();
             Movegen.generate(MoveType.MV_LEGAL, pos, mlist.moves, ref mlist.pos);
             for (int i = 0; i < mlist.pos; i++)
             {
-                if (str == Utils.move_to_uci(mlist.moves[i].move, pos.chess960))
+                if (strLowerPromotion == Utils.move_to_uci(mlist.moves[i].move, pos.chess960))
                 {
                     Move retval = mlist.moves[i].move;
                     MListBroker.Free(mlist);
