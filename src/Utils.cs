@@ -1379,22 +1379,22 @@ namespace Portfish
         {
             if (hits[0] != 0)
             {
-                Plug.Interface.Write("Total ");
-                Plug.Interface.Write(hits[0].ToString());
-                Plug.Interface.Write(" Hits ");
-                Plug.Interface.Write(hits[1].ToString());
-                Plug.Interface.Write(" hit rate (%) ");
-                Plug.Interface.Write((100 * hits[1] / hits[0]).ToString());
-                Plug.Interface.Write(Constants.endl);
+                Plug.Write("Total ");
+                Plug.Write(hits[0].ToString());
+                Plug.Write(" Hits ");
+                Plug.Write(hits[1].ToString());
+                Plug.Write(" hit rate (%) ");
+                Plug.Write((100 * hits[1] / hits[0]).ToString());
+                Plug.Write(Constants.endl);
             }
 
             if (means[0] != 0)
             {
-                Plug.Interface.Write("Total ");
-                Plug.Interface.Write(means[0].ToString());
-                Plug.Interface.Write(" Mean ");
-                Plug.Interface.Write(((float)means[1] / means[0]).ToString());
-                Plug.Interface.Write(Constants.endl);
+                Plug.Write("Total ");
+                Plug.Write(means[0].ToString());
+                Plug.Write(" Mean ");
+                Plug.Write(((float)means[1] / means[0]).ToString());
+                Plug.Write(Constants.endl);
             }
         }
 

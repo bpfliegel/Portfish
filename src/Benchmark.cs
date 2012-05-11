@@ -117,20 +117,20 @@ namespace Portfish
                 time.Reset(); time.Start();
                 Position pos = new Position(fens[i], bool.Parse(OptionMap.Instance["UCI_Chess960"].v), Threads.main_thread());
 
-                Plug.Interface.Write("\nPosition: ");
-                Plug.Interface.Write((i + 1).ToString());
-                Plug.Interface.Write("/");
-                Plug.Interface.Write(fens.Count.ToString());
-                Plug.Interface.Write(Constants.endl);
+                Plug.Write("\nPosition: ");
+                Plug.Write((i + 1).ToString());
+                Plug.Write("/");
+                Plug.Write(fens.Count.ToString());
+                Plug.Write(Constants.endl);
 
                 if (limitType == "perft")
                 {
                     Int64 cnt = Search.perft(pos, limits.depth * DepthC.ONE_PLY);
-                    Plug.Interface.Write("\nPerft ");
-                    Plug.Interface.Write(limits.depth.ToString());
-                    Plug.Interface.Write(" leaf nodes: ");
-                    Plug.Interface.Write(cnt.ToString());
-                    Plug.Interface.Write(Constants.endl);
+                    Plug.Write("\nPerft ");
+                    Plug.Write(limits.depth.ToString());
+                    Plug.Write(" leaf nodes: ");
+                    Plug.Write(cnt.ToString());
+                    Plug.Write(Constants.endl);
                     nodes = cnt;
                 }
                 else
@@ -146,30 +146,30 @@ namespace Portfish
                 nodesAll += nodes;
                 eAll += e;
 
-                Plug.Interface.Write("\n===========================");
-                Plug.Interface.Write("\nTotal time (ms) : ");
-                Plug.Interface.Write(e.ToString());
-                Plug.Interface.Write("\nNodes searched  : ");
-                Plug.Interface.Write(nodes.ToString());
-                Plug.Interface.Write("\nNodes/second    : ");
-                Plug.Interface.Write(((int)(nodes / (e / 1000.0))).ToString());
-                Plug.Interface.Write(Constants.endl);
+                Plug.Write("\n===========================");
+                Plug.Write("\nTotal time (ms) : ");
+                Plug.Write(e.ToString());
+                Plug.Write("\nNodes searched  : ");
+                Plug.Write(nodes.ToString());
+                Plug.Write("\nNodes/second    : ");
+                Plug.Write(((int)(nodes / (e / 1000.0))).ToString());
+                Plug.Write(Constants.endl);
 
             }
 
-            Plug.Interface.Write("\n===========================");
-            Plug.Interface.Write("\nTotal time (ms) : ");
-            Plug.Interface.Write(eAll.ToString());
-            Plug.Interface.Write("\nNodes searched  : ");
-            Plug.Interface.Write(nodesAll.ToString());
-            Plug.Interface.Write("\nNodes/second    : ");
-            Plug.Interface.Write(((int)(nodesAll / (eAll / 1000.0))).ToString());
-            Plug.Interface.Write(Constants.endl);
+            Plug.Write("\n===========================");
+            Plug.Write("\nTotal time (ms) : ");
+            Plug.Write(eAll.ToString());
+            Plug.Write("\nNodes searched  : ");
+            Plug.Write(nodesAll.ToString());
+            Plug.Write("\nNodes/second    : ");
+            Plug.Write(((int)(nodesAll / (eAll / 1000.0))).ToString());
+            Plug.Write(Constants.endl);
 
             //for (int i = 0; i < res.Length; i++)
             //{
-            //    Plug.Interface.Write(string.Format("{0}: {1}", i, res[i]));
-            //    Plug.Interface.Write(Constants.endl);
+            //    Plug.Write(string.Format("{0}: {1}", i, res[i]));
+            //    Plug.Write(Constants.endl);
             //}
         }
     }

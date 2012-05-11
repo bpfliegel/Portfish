@@ -10,8 +10,8 @@ namespace Portfish
         {
             string[] args = (string[])arguments;
 
-            Plug.Interface.Write(Utils.engine_info());
-            Plug.Interface.Write(Constants.endl);
+            Plug.Write(Utils.engine_info());
+            Plug.Write(Constants.endl);
 
             CheckInfoBroker.init();
             EvalInfoBroker.init();
@@ -33,6 +33,14 @@ namespace Portfish
             Evaluate.init();
 
             Threads.init();
+
+            // .Net warmup sequence
+            Plug.IsWarmup = true;
+            Position pos = new Position(Uci.StartFEN, false, Threads.main_thread());
+            Stack<string> stack = Utils.CreateStack("go depth 7");
+            Uci.go(pos, stack);
+            Threads.wait_for_search_finished();
+            Plug.IsWarmup = false;
 
             StringBuilder sb = new StringBuilder();
             for (int i = 1; i < args.Length; i++)

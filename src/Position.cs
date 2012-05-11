@@ -1014,15 +1014,15 @@ namespace Portfish
             if (move != 0)
             {
                 Position p = new Position(this);
-                Plug.Interface.Write("\nMove is: ");
-                Plug.Interface.Write((sideToMove == ColorC.BLACK ? ".." : ""));
-                Plug.Interface.Write(Utils.move_to_san(p, move));
+                Plug.Write("\nMove is: ");
+                Plug.Write((sideToMove == ColorC.BLACK ? ".." : ""));
+                Plug.Write(Utils.move_to_san(p, move));
             }
 
             for (Rank rank = RankC.RANK_8; rank >= RankC.RANK_1; rank--)
             {
-                Plug.Interface.Write(dottedLine);
-                Plug.Interface.Write("|");
+                Plug.Write(dottedLine);
+                Plug.Write("|");
                 for (File file = FileC.FILE_A; file <= FileC.FILE_H; file++)
                 {
                     Square sq = Utils.make_square(file, rank);
@@ -1032,18 +1032,18 @@ namespace Portfish
                     if (piece == PieceC.NO_PIECE && !Utils.opposite_colors(sq, SquareC.SQ_A1))
                         piece++; // Index the dot
 
-                    Plug.Interface.Write(c.ToString());
-                    Plug.Interface.Write(PieceToChar[piece].ToString());
-                    Plug.Interface.Write(c.ToString());
-                    Plug.Interface.Write("|");
+                    Plug.Write(c.ToString());
+                    Plug.Write(PieceToChar[piece].ToString());
+                    Plug.Write(c.ToString());
+                    Plug.Write("|");
                 }
             }
-            Plug.Interface.Write(dottedLine);
-            Plug.Interface.Write("Fen is: ");
-            Plug.Interface.Write(to_fen());
-            Plug.Interface.Write("\nKey is: ");
-            Plug.Interface.Write(st.key.ToString());
-            Plug.Interface.Write(Constants.endl);
+            Plug.Write(dottedLine);
+            Plug.Write("Fen is: ");
+            Plug.Write(to_fen());
+            Plug.Write("\nKey is: ");
+            Plug.Write(st.key.ToString());
+            Plug.Write(Constants.endl);
         }
 
         /// Position::set_castle_right() is an helper function used to set castling

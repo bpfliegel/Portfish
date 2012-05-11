@@ -376,9 +376,9 @@ namespace Portfish
 
             if (RootMoves.Count == 0)
             {
-                Plug.Interface.Write("info depth 0 score ");
-                Plug.Interface.Write(score_to_uci(pos.in_check() ? -ValueC.VALUE_MATE : ValueC.VALUE_DRAW));
-                Plug.Interface.Write(Constants.endl);
+                Plug.Write("info depth 0 score ");
+                Plug.Write(score_to_uci(pos.in_check() ? -ValueC.VALUE_MATE : ValueC.VALUE_DRAW));
+                Plug.Write(Constants.endl);
 
                 RootMoves.Add(new RootMove(MoveC.MOVE_NONE));
                 goto finalize;
@@ -436,11 +436,11 @@ namespace Portfish
                 pos.this_thread().wait_for_stop_or_ponderhit();
 
             // Best move could be MOVE_NONE when searching on a stalemate position
-            Plug.Interface.Write("bestmove ");
-            Plug.Interface.Write(Utils.move_to_uci(RootMoves[0].pv[0], Chess960));
-            Plug.Interface.Write(" ponder ");
-            Plug.Interface.Write(Utils.move_to_uci(RootMoves[0].pv[1], Chess960));
-            Plug.Interface.Write(Constants.endl);
+            Plug.Write("bestmove ");
+            Plug.Write(Utils.move_to_uci(RootMoves[0].pv[0], Chess960));
+            Plug.Write(" ponder ");
+            Plug.Write(Utils.move_to_uci(RootMoves[0].pv[1], Chess960));
+            Plug.Write(Constants.endl);
         }
 
         // id_loop() is the main iterative deepening loop. It calls search() repeatedly
@@ -1001,15 +1001,15 @@ namespace Portfish
 
                     if (thisThread == Threads.main_thread() && SearchTime.ElapsedMilliseconds > 2000)
                     {
-                        Plug.Interface.Write("info depth ");
-                        Plug.Interface.Write((depth / DepthC.ONE_PLY).ToString());
-                        Plug.Interface.Write(" currmove ");
-                        Plug.Interface.Write(Utils.move_to_uci(move, Chess960));
-                        Plug.Interface.Write(" nodes ");
-                        Plug.Interface.Write(pos.nodes.ToString());
-                        Plug.Interface.Write(" currmovenumber ");
-                        Plug.Interface.Write((moveCount + PVIdx).ToString());
-                        Plug.Interface.Write(Constants.endl);
+                        Plug.Write("info depth ");
+                        Plug.Write((depth / DepthC.ONE_PLY).ToString());
+                        Plug.Write(" currmove ");
+                        Plug.Write(Utils.move_to_uci(move, Chess960));
+                        Plug.Write(" nodes ");
+                        Plug.Write(pos.nodes.ToString());
+                        Plug.Write(" currmovenumber ");
+                        Plug.Write((moveCount + PVIdx).ToString());
+                        Plug.Write(Constants.endl);
                     }
                 }
 
@@ -1719,23 +1719,23 @@ namespace Portfish
                     s.Append(" ").Append(Utils.move_to_uci(RootMoves[i].pv[j], Chess960));
                 }
 
-                Plug.Interface.Write("info depth ");
-                Plug.Interface.Write(d.ToString());
-                Plug.Interface.Write(" seldepth ");
-                Plug.Interface.Write(selDepth.ToString());
-                Plug.Interface.Write(" score ");
-                Plug.Interface.Write((i == PVIdx ? score_to_uci(v, alpha, beta) : score_to_uci(v)));
-                Plug.Interface.Write(" nodes ");
-                Plug.Interface.Write(pos.nodes.ToString());
-                Plug.Interface.Write(" nps ");
-                Plug.Interface.Write(((t > 0 ? pos.nodes * 1000 / t : 0)).ToString());
-                Plug.Interface.Write(" time ");
-                Plug.Interface.Write(t.ToString());
-                Plug.Interface.Write(" multipv ");
-                Plug.Interface.Write((i + 1).ToString());
-                Plug.Interface.Write(" pv");
-                Plug.Interface.Write(s.ToString());
-                Plug.Interface.Write(Constants.endl);
+                Plug.Write("info depth ");
+                Plug.Write(d.ToString());
+                Plug.Write(" seldepth ");
+                Plug.Write(selDepth.ToString());
+                Plug.Write(" score ");
+                Plug.Write((i == PVIdx ? score_to_uci(v, alpha, beta) : score_to_uci(v)));
+                Plug.Write(" nodes ");
+                Plug.Write(pos.nodes.ToString());
+                Plug.Write(" nps ");
+                Plug.Write(((t > 0 ? pos.nodes * 1000 / t : 0)).ToString());
+                Plug.Write(" time ");
+                Plug.Write(t.ToString());
+                Plug.Write(" multipv ");
+                Plug.Write((i + 1).ToString());
+                Plug.Write(" pv");
+                Plug.Write(s.ToString());
+                Plug.Write(Constants.endl);
             }
         }
 

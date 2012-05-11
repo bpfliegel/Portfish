@@ -53,7 +53,7 @@ namespace Portfish
                 {
                     cmd = args;
                 }
-                else if (String.IsNullOrEmpty(cmd = Plug.Interface.ReadLine())) // Block here waiting for input
+                else if (String.IsNullOrEmpty(cmd = Plug.ReadLine())) // Block here waiting for input
                 {
                     cmd = "quit";
                 }
@@ -87,8 +87,8 @@ namespace Portfish
                 { /* Avoid returning "Unknown command" */ }
                 else if (token == "isready")
                 {
-                    Plug.Interface.Write("readyok");
-                    Plug.Interface.Write(Constants.endl);
+                    Plug.Write("readyok");
+                    Plug.Write(Constants.endl);
                 }
                 else if (token == "position")
                 {
@@ -108,8 +108,8 @@ namespace Portfish
                 }
                 else if (token == "eval")
                 {
-                    Plug.Interface.Write(Evaluate.trace(pos));
-                    Plug.Interface.Write(Constants.endl);
+                    Plug.Write(Evaluate.trace(pos));
+                    Plug.Write(Constants.endl);
                 }
                 else if (token == "bench")
                 {
@@ -117,19 +117,19 @@ namespace Portfish
                 }
                 else if (token == "key")
                 {
-                    Plug.Interface.Write("key: ");
-                    Plug.Interface.Write(String.Format("{0:X}", pos.key()));
-                    Plug.Interface.Write("\nmaterial key: ");
-                    Plug.Interface.Write(pos.material_key().ToString());
-                    Plug.Interface.Write("\npawn key: ");
-                    Plug.Interface.Write(pos.pawn_key().ToString());
-                    Plug.Interface.Write(Constants.endl);
+                    Plug.Write("key: ");
+                    Plug.Write(String.Format("{0:X}", pos.key()));
+                    Plug.Write("\nmaterial key: ");
+                    Plug.Write(pos.material_key().ToString());
+                    Plug.Write("\npawn key: ");
+                    Plug.Write(pos.pawn_key().ToString());
+                    Plug.Write(Constants.endl);
                 }
                 else if (token == "uci")
                 {
-                    Plug.Interface.Write("id name "); Plug.Interface.Write(Utils.engine_info(true));
-                    Plug.Interface.Write("\n"); Plug.Interface.Write(OptionMap.Instance.ToString());
-                    Plug.Interface.Write("\nuciok"); Plug.Interface.Write(Constants.endl);
+                    Plug.Write("id name "); Plug.Write(Utils.engine_info(true));
+                    Plug.Write("\n"); Plug.Write(OptionMap.Instance.ToString());
+                    Plug.Write("\nuciok"); Plug.Write(Constants.endl);
                 }
                 else if (token == "perft")
                 {
@@ -141,9 +141,9 @@ namespace Portfish
                 }
                 else
                 {
-                    Plug.Interface.Write("Unknown command: ");
-                    Plug.Interface.Write(cmd);
-                    Plug.Interface.Write(Constants.endl);
+                    Plug.Write("Unknown command: ");
+                    Plug.Write(cmd);
+                    Plug.Write(Constants.endl);
                 }
 
                 if (args.Length > 0) // Command line arguments have one-shot behaviour
@@ -217,9 +217,9 @@ namespace Portfish
             }
             else
             {
-                Plug.Interface.Write("No such option: ");
-                Plug.Interface.Write(name);
-                Plug.Interface.Write(Constants.endl);
+                Plug.Write("No such option: ");
+                Plug.Write(name);
+                Plug.Write(Constants.endl);
             }
         }
 
