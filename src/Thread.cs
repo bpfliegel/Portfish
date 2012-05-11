@@ -89,7 +89,7 @@ namespace Portfish
         internal volatile bool do_sleep;
         internal volatile bool do_exit;
 
-        internal Thread(ThreadLoopType lt)
+        internal Thread(ThreadLoopType lt, ManualResetEvent initEvent)
         {
             is_searching = do_exit = false;
             maxPly = splitPointsCnt = 0;
@@ -108,14 +108,16 @@ namespace Portfish
                 ThreadHelper.lock_init(splitPoints[j].Lock);
             }
 
-            ThreadPool.QueueUserWorkItem(this.StartThread);
+            ThreadPool.QueueUserWorkItem(this.StartThread, initEvent);
         }
 
         internal void StartThread(object state)
         {
-            if (loopType == ThreadLoopType.Timer) { timer_loop(); }
-            if (loopType == ThreadLoopType.Main) { main_loop(); }
-            if (loopType == ThreadLoopType.Idle) { idle_loop(null); }
+            ManualResetEvent initEvent = (ManualResetEvent)state;
+            BrokerManager.Warmup();
+            if (loopType == ThreadLoopType.Timer) { timer_loop(initEvent); }
+            if (loopType == ThreadLoopType.Main) { main_loop(initEvent); }
+            if (loopType == ThreadLoopType.Idle) { idle_loop(null, initEvent); }
         }
 
         internal void exit()
@@ -200,8 +202,18 @@ namespace Portfish
 
         // Thread::main_loop() is where the main thread is parked waiting to be started
         // when there is a new search. Main thread will launch all the slave threads.
-        internal void main_loop()
+        internal void main_loop(ManualResetEvent initEvent)
         {
+            // Initialize the TT here
+            UInt32 ttSize = UInt32.Parse(OptionMap.Instance["Hash"].v);
+            if (TT.size != ttSize)
+            {
+                TT.set_size(ttSize);
+            }
+
+            // Signal done
+            initEvent.Set();
+
             while (true)
             {
                 ThreadHelper.lock_grab(sleepLock);
@@ -228,8 +240,11 @@ namespace Portfish
 
         // Thread::timer_loop() is where the timer thread waits maxPly milliseconds and
         // then calls do_timer_event(). If maxPly is 0 thread sleeps until is woken up.
-        internal void timer_loop()
+        internal void timer_loop(ManualResetEvent initEvent)
         {
+            // Signal done
+            initEvent.Set();
+
             while (!do_exit)
             {
                 ThreadHelper.lock_grab(sleepLock);
@@ -242,8 +257,14 @@ namespace Portfish
         /// Thread::idle_loop() is where the thread is parked when it has no work to do.
         /// The parameter 'master_sp', if non-NULL, is a pointer to an active SplitPoint
         /// object for which the thread is the master.
-        internal void idle_loop(SplitPoint sp_master)
+        internal void idle_loop(SplitPoint sp_master, ManualResetEvent initEvent)
         {
+            if (initEvent != null)
+            {
+                // Signal done
+                initEvent.Set();
+            }
+
             bool use_sleeping_threads = Threads.useSleepingThreads;
 
             // If this thread is the master of a split point and all slaves have
@@ -425,19 +446,28 @@ namespace Portfish
         // UCI options and creates/destroys threads to match the requested number. Thread
         // objects are dynamically allocated to avoid creating in advance all possible
         // threads, with included pawns and material tables, if only few are used.
-        internal static void read_uci_options()
+        internal static void read_uci_options(ManualResetEvent[] initEvents)
         {
             maxThreadsPerSplitPoint = int.Parse(OptionMap.Instance["Max Threads per Split Point"].v);
             minimumSplitDepth = int.Parse(OptionMap.Instance["Min Split Depth"].v) * DepthC.ONE_PLY;
             useSleepingThreads = bool.Parse(OptionMap.Instance["Use Sleeping Threads"].v);
 
             int requested = int.Parse(OptionMap.Instance["Threads"].v);
+            int current = 0;
 
             Debug.Assert(requested > 0);
 
             while (size() < requested)
             {
-                threads.Add(new Thread(ThreadLoopType.Idle));
+                if (initEvents == null)
+                {
+                    threads.Add(new Thread(ThreadLoopType.Idle, null));
+                }
+                else
+                {
+                    threads.Add(new Thread(ThreadLoopType.Idle, initEvents[current+2]));
+                    current++;
+                }
             }
 
             while (size() > requested)
@@ -453,11 +483,27 @@ namespace Portfish
         // and launches all threads sending them immediately to sleep.
         internal static void init()
         {
+            int requested = int.Parse(OptionMap.Instance["Threads"].v);
+            ManualResetEvent[] initEvents = new ManualResetEvent[requested+1];
+            for (int i = 0; i < (requested+1); i++)
+            {
+                initEvents[i] = new ManualResetEvent(false);
+            }
+
             ThreadHelper.cond_init(sleepCond);
             ThreadHelper.lock_init(splitLock);
-            timer = new Thread(ThreadLoopType.Timer);
-            threads.Add(new Thread(ThreadLoopType.Main));
-            read_uci_options();
+
+            ThreadPool.QueueUserWorkItem(new WaitCallback(launch_threads), initEvents);
+
+            WaitHandle.WaitAll(initEvents);
+        }
+
+        private static void launch_threads(object state)
+        {
+            ManualResetEvent[] initEvents = (ManualResetEvent[])state;
+            timer = new Thread(ThreadLoopType.Timer, initEvents[0]);
+            threads.Add(new Thread(ThreadLoopType.Main, initEvents[1]));
+            read_uci_options(initEvents);
         }
 
         // exit() is called to cleanly terminate the threads when the program finishes
@@ -568,7 +614,7 @@ namespace Portfish
             // their work at this split point.
             if (slavesCnt != 0 || Fake)
             {
-                master.idle_loop(sp);
+                master.idle_loop(sp, null);
                 // In helpful master concept a master can help only a sub-tree of its split
                 // point, and because here is all finished is not possible master is booked.
                 Debug.Assert(!master.is_searching);

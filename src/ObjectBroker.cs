@@ -6,6 +6,62 @@ using System.Threading;
 
 namespace Portfish
 {
+    internal static class BrokerManager
+    {
+        internal static void Warmup()
+        {
+            // Bench 128 4 17 yields:
+
+            // CheckInfoBroker: 140 (4/32/40/32/32)
+            // EvalInfoBroker: 16 (4/4/4/4)
+            // SwapListBroker: 16 (4/4/4/4)
+            // MovesSearchedBroker: 120 (28/36/28/28)
+            // PositionBroker: 32 (8/8/8/8)
+            // StateInfoArrayBroker: 16 (4/4/4/4)
+
+            // MListBroker: 20 (4/4/4/4/4)
+            // LoopStackBroker: 32 (8/8/8/8)
+            // MovePickerBroker: 136 (32/40/32/32)
+            // StateInfoBroker: 132 (32/36/32/32)
+
+            // Specific allocation not to overallocate memory for nothing
+            int i, brokerSize;
+
+            // Reusing brokers
+            brokerSize = 40; for (i = 0; i < brokerSize; i++) { CheckInfoBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { CheckInfoBroker.Free(null); }
+            brokerSize = 4; for (i = 0; i < brokerSize; i++) { EvalInfoBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { EvalInfoBroker.Free(null); }
+            brokerSize = 4; for (i = 0; i < brokerSize; i++) { SwapListBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { SwapListBroker.Free(null); }
+            brokerSize = 36; for (i = 0; i < brokerSize; i++) { MovesSearchedBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { MovesSearchedBroker.Free(null); }
+            brokerSize = 8; for (i = 0; i < brokerSize; i++) { PositionBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { PositionBroker.Free(null); }
+            brokerSize = 4; for (i = 0; i < brokerSize; i++) { StateInfoArrayBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { StateInfoArrayBroker.Free(null); }
+
+            // Recycling brokers
+            brokerSize = 4; MList[] arrMList = new MList[brokerSize]; for (i = 0; i < brokerSize; i++) { arrMList[i] = MListBroker.GetObject(); } for (i = brokerSize - 1; i >= 0; i--) { MListBroker.Free(arrMList[i]); }
+            brokerSize = 8; LoopStack[] arrLoopStack = new LoopStack[brokerSize]; for (i = 0; i < brokerSize; i++) { arrLoopStack[i] = LoopStackBroker.GetObject(); } for (i = brokerSize - 1; i >= 0; i--) { LoopStackBroker.Free(arrLoopStack[i]); }
+            brokerSize = 40; MovePicker[] arrMovePicker = new MovePicker[brokerSize]; for (i = 0; i < brokerSize; i++) { arrMovePicker[i] = MovePickerBroker.GetObject(); } for (i = brokerSize - 1; i >= 0; i--) { MovePickerBroker.Free(arrMovePicker[i]); }
+            brokerSize = 36; StateInfo[] arrStateInfo = new StateInfo[brokerSize]; for (i = 0; i < brokerSize; i++) { arrStateInfo[i] = StateInfoBroker.GetObject(); } for (i = brokerSize - 1; i >= 0; i--) { StateInfoBroker.Free(arrStateInfo[i]); }
+        }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(CheckInfoBroker.Report());
+            sb.Append(EvalInfoBroker.Report());
+            sb.Append(SwapListBroker.Report());
+            sb.Append(MovesSearchedBroker.Report());
+            sb.Append(PositionBroker.Report());
+            sb.Append(StateInfoArrayBroker.Report());
+
+            sb.Append(MListBroker.Report());
+            sb.Append(LoopStackBroker.Report());
+            sb.Append(MovePickerBroker.Report());
+            sb.Append(StateInfoBroker.Report());
+
+            return sb.ToString();
+        }
+    }
+
     #region Reusing brokers
 
     internal static class CheckInfoBroker // Reusing
@@ -41,6 +97,17 @@ namespace Portfish
         internal static void Free(CheckInfo obj)
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+        }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("CheckInfoBroker: {0}{1}\r\n", entryCount, entryCount>0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
         }
     }
 
@@ -78,6 +145,17 @@ namespace Portfish
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
         }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("EvalInfoBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
+        }
     }
 
     internal static class SwapListBroker // Reusing
@@ -113,6 +191,17 @@ namespace Portfish
         internal static void Free(SwapList obj)
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+        }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("SwapListBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
         }
     }
 
@@ -150,6 +239,17 @@ namespace Portfish
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
         }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("MovesSearchedBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
+        }
     }
 
     internal static class StateInfoArrayBroker // Reusing
@@ -186,6 +286,17 @@ namespace Portfish
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
         }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("StateInfoArrayBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
+        }
     }
 
     internal static class PositionBroker // Reusing
@@ -221,6 +332,17 @@ namespace Portfish
         internal static void Free(Position obj)
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+        }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("PositionBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
         }
     }
 
@@ -263,6 +385,17 @@ namespace Portfish
             obj.Recycle();
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
         }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("MovePickerBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
+        }
     }
 
     internal static class StateInfoBroker // Recycling
@@ -299,6 +432,17 @@ namespace Portfish
         {
             obj.Recycle();
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+        }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("StateInfoBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
         }
     }
 
@@ -337,6 +481,17 @@ namespace Portfish
             obj.Recycle();
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
         }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("LoopStackBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
+        }
     }
 
     internal static class MListBroker // Recycling
@@ -373,6 +528,17 @@ namespace Portfish
         {
             obj.Recycle();
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+        }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("MListBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
         }
     }
 

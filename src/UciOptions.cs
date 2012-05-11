@@ -96,7 +96,7 @@ namespace Portfish
     internal static class UCIOptionChanges
     {
         internal static void on_eval(UCIOption opt) { Evaluate.init(); }
-        internal static void on_threads(UCIOption opt) { Threads.read_uci_options(); }
+        internal static void on_threads(UCIOption opt) { Threads.read_uci_options(null); }
         //internal static void on_hash_size(UCIOption opt) { TT.set_size(UInt32.Parse(opt.v)); }
         internal static void on_clear_hash(UCIOption opt) { TT.clear(); }
     }
