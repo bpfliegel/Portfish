@@ -961,7 +961,7 @@ namespace Portfish
                                    && depth >= SingularExtensionDepth[PvNode ? 1 : 0]
                                    && ttMove != MoveC.MOVE_NONE
                                    && (excludedMove == 0) // Recursive singular search is not allowed
-                                   && (((int)tte.type() & (int)Bound.BOUND_LOWER) != 0) // FIXME: uninitialized!
+                                   && ((tte.type() & Bound.BOUND_LOWER) != 0) // FIXME: uninitialized!
                                    && tte.depth() >= depth - 3 * DepthC.ONE_PLY;
 
             // Step 11. Loop through moves
@@ -1678,16 +1678,16 @@ namespace Portfish
                       || v >= Math.Max(ValueC.VALUE_MATE_IN_MAX_PLY, beta)
                       || v < Math.Min(ValueC.VALUE_MATED_IN_MAX_PLY, beta))
 
-                  && (((((int)tte.type() & (int)(Bound.BOUND_LOWER)) != 0) && v >= beta)
-                      || ((((int)tte.type() & (int)(Bound.BOUND_UPPER)) != 0) && v < beta));
+                  && ((((tte.type() & Bound.BOUND_LOWER) != 0) && v >= beta)
+                      || (((tte.type() & Bound.BOUND_UPPER) != 0) && v < beta));
         }
 
         // refine_eval() returns the transposition table score if possible, otherwise
         // falls back on static position evaluation.
         static Value refine_eval(TTEntry tte, Value v, Value defaultEval)
         {
-            if (((((int)tte.type() & (int)(Bound.BOUND_LOWER)) != 0) && v >= defaultEval)
-                || ((((int)tte.type() & (int)(Bound.BOUND_UPPER)) != 0) && v < defaultEval))
+            if ((((tte.type() & Bound.BOUND_LOWER) != 0) && v >= defaultEval)
+                || (((tte.type() & Bound.BOUND_UPPER) != 0) && v < defaultEval))
                 return v;
 
             return defaultEval;
