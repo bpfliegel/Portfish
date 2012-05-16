@@ -97,7 +97,7 @@ namespace Portfish
             StateInfoArray sia = StateInfoArrayBroker.GetObject();
 
             int stPos = 0;
-            TTEntry? tte;
+            TTEntry tte;
             int ply = 1;
             Move m = pv[0];
 
@@ -109,8 +109,8 @@ namespace Portfish
 
             UInt32 ttePos = 0;
 
-            while ((tte = TT.probe(pos.key(), ref ttePos)) != null
-               && (m = tte.Value.move()) != MoveC.MOVE_NONE // Local copy, TT entry could change
+            while (TT.probe(pos.key(), ref ttePos, out tte)
+               && (m = tte.move()) != MoveC.MOVE_NONE // Local copy, TT entry could change
                && pos.is_pseudo_legal(m)
                && pos.pl_move_is_legal(m, pos.pinned_pieces())
                && ply < Constants.MAX_PLY
@@ -135,7 +135,8 @@ namespace Portfish
             StateInfoArray sia = StateInfoArrayBroker.GetObject();
 
             int stPos = 0;
-            TTEntry? tte;
+            TTEntry tte;
+            bool tteHasValue;
             Key k;
             Value v, m = ValueC.VALUE_NONE;
             int ply = 0;
@@ -146,10 +147,10 @@ namespace Portfish
             do
             {
                 k = pos.key();
-                tte = TT.probe(k, ref ttePos);
+                tteHasValue = TT.probe(k, ref ttePos, out tte);
 
                 // Don't overwrite existing correct entries
-                if ((!tte.HasValue) || tte.Value.move() != pv[ply])
+                if ((!tteHasValue) || tte.move() != pv[ply])
                 {
                     v = (pos.in_check() ? ValueC.VALUE_NONE : Evaluate.do_evaluate(false, pos, ref m));
                     TT.store(k, ValueC.VALUE_NONE, Bound.BOUND_NONE, DepthC.DEPTH_NONE, pv[ply], v, m);
@@ -640,7 +641,8 @@ namespace Portfish
             Move[] movesSearched = ms.movesSearched;
 
             StateInfo st = null;
-            TTEntry? tte;
+            TTEntry tte = TT.StaticEntry;
+            bool tteHasValue = false;
             UInt32 ttePos = 0;
             Key posKey = 0;
             Move ttMove, move, excludedMove, bestMove, threatMove;
@@ -666,7 +668,6 @@ namespace Portfish
             // Step 1. Initialize node
             if (SpNode)
             {
-                tte = null;
                 ttMove = excludedMove = MoveC.MOVE_NONE;
                 ttValue = ValueC.VALUE_ZERO;
 
@@ -722,16 +723,16 @@ namespace Portfish
             // TT value, so we use a different position key in case of an excluded move.
             excludedMove = ss[ssPos].excludedMove;
             posKey = (excludedMove != 0) ? pos.exclusion_key() : pos.key();
-            tte = TT.probe(posKey, ref ttePos);
-            ttMove = RootNode ? RootMoves[PVIdx].pv[0] : tte.HasValue ? tte.Value.move() : MoveC.MOVE_NONE;
-            ttValue = tte.HasValue ? value_from_tt(tte.Value.value(), ss[ssPos].ply) : ValueC.VALUE_ZERO;
+            tteHasValue = TT.probe(posKey, ref ttePos, out tte);
+            ttMove = RootNode ? RootMoves[PVIdx].pv[0] : tteHasValue ? tte.move() : MoveC.MOVE_NONE;
+            ttValue = tteHasValue ? value_from_tt(tte.value(), ss[ssPos].ply) : ValueC.VALUE_ZERO;
 
             // At PV nodes we check for exact scores, while at non-PV nodes we check for
             // a fail high/low. Biggest advantage at probing at PV nodes is to have a
             // smooth experience in analysis mode. We don't probe at Root nodes otherwise
             // we should also update RootMoveList to avoid bogus output.
-            if (!RootNode && tte.HasValue && (PvNode ? tte.Value.depth() >= depth && tte.Value.type() == Bound.BOUND_EXACT
-                                            : can_return_tt(tte.Value, depth, ttValue, beta)))
+            if (!RootNode && tteHasValue && (PvNode ? tte.depth() >= depth && tte.type() == Bound.BOUND_EXACT
+                                            : can_return_tt(tte, depth, ttValue, beta)))
             {
                 TT.entries[ttePos].set_generation(TT.generation);
                 ss[ssPos].currentMove = ttMove; // Can be MOVE_NONE
@@ -752,12 +753,12 @@ namespace Portfish
             // Step 5. Evaluate the position statically and update parent's gain statistics
             if (inCheck)
                 ss[ssPos].eval = ss[ssPos].evalMargin = ValueC.VALUE_NONE;
-            else if (tte.HasValue)
+            else if (tteHasValue)
             {
-                Debug.Assert(tte.Value.static_value() != ValueC.VALUE_NONE);
-                ss[ssPos].eval = tte.Value.static_value();
-                ss[ssPos].evalMargin = tte.Value.static_value_margin();
-                refinedValue = refine_eval(tte.Value, ttValue, ss[ssPos].eval);
+                Debug.Assert(tte.static_value() != ValueC.VALUE_NONE);
+                ss[ssPos].eval = tte.static_value();
+                ss[ssPos].evalMargin = tte.static_value_margin();
+                refinedValue = refine_eval(tte, ttValue, ss[ssPos].eval);
             }
             else
             {
@@ -939,13 +940,13 @@ namespace Portfish
                 search(PvNode ? NodeTypeC.PV : NodeTypeC.NonPV, pos, ss, ssPos, alpha, beta, d);
                 ss[ssPos].skipNullMove = 0;
 
-                tte = TT.probe(posKey, ref ttePos);
-                ttMove = (tte.HasValue) ? tte.Value.move() : MoveC.MOVE_NONE;
+                tteHasValue = TT.probe(posKey, ref ttePos, out tte);
+                ttMove = (tteHasValue) ? tte.move() : MoveC.MOVE_NONE;
             }
             else
             {
                 // Re-read (needed as TTEntry is a struct in the port)
-                if ((tte.HasValue) && (TT.entries[ttePos].key == tte.Value.key)) { tte = TT.entries[ttePos]; }
+                if ((tteHasValue) && (TT.entries[ttePos].key == tte.key)) { tte = TT.entries[ttePos]; }
             }
 
         split_point_start: // At split points actual search starts from here
@@ -960,8 +961,8 @@ namespace Portfish
                                    && depth >= SingularExtensionDepth[PvNode ? 1 : 0]
                                    && ttMove != MoveC.MOVE_NONE
                                    && (excludedMove == 0) // Recursive singular search is not allowed
-                                   && (((int)tte.Value.type() & (int)Bound.BOUND_LOWER) != 0)
-                                   && tte.Value.depth() >= depth - 3 * DepthC.ONE_PLY;
+                                   && (((int)tte.type() & (int)Bound.BOUND_LOWER) != 0) // FIXME: uninitialized!
+                                   && tte.depth() >= depth - 3 * DepthC.ONE_PLY;
 
             // Step 11. Loop through moves
             // Loop through all pseudo-legal moves until no moves remain or a beta cutoff occurs
@@ -1310,7 +1311,8 @@ namespace Portfish
             Value ttValue, bestValue, value, evalMargin = 0, futilityValue, futilityBase;
 
             bool inCheck, enoughMaterial, givesCheck, evasionPrunable;
-            TTEntry? tte;
+            bool tteHasValue = false;
+            TTEntry tte;
             UInt32 ttePos = 0;
             Depth ttDepth;
             Bound bt;
@@ -1331,11 +1333,11 @@ namespace Portfish
 
             // Transposition table lookup. At PV nodes, we don't use the TT for
             // pruning, but only for move ordering.
-            tte = TT.probe(pos.key(), ref ttePos);
-            ttMove = (tte.HasValue ? tte.Value.move() : MoveC.MOVE_NONE);
-            ttValue = tte.HasValue ? value_from_tt(tte.Value.value(), ss[ssPos].ply) : ValueC.VALUE_ZERO;
+            tteHasValue = TT.probe(pos.key(), ref ttePos, out tte);
+            ttMove = (tteHasValue ? tte.move() : MoveC.MOVE_NONE);
+            ttValue = tteHasValue ? value_from_tt(tte.value(), ss[ssPos].ply) : ValueC.VALUE_ZERO;
 
-            if (!PvNode && tte.HasValue && can_return_tt(tte.Value, ttDepth, ttValue, beta))
+            if (!PvNode && tteHasValue && can_return_tt(tte, ttDepth, ttValue, beta))
             {
                 ss[ssPos].currentMove = ttMove; // Can be MOVE_NONE
                 return ttValue;
@@ -1350,11 +1352,11 @@ namespace Portfish
             }
             else
             {
-                if (tte.HasValue)
+                if (tteHasValue)
                 {
-                    Debug.Assert(tte.Value.static_value() != ValueC.VALUE_NONE);
-                    evalMargin = tte.Value.static_value_margin();
-                    ss[ssPos].eval = bestValue = tte.Value.static_value();
+                    Debug.Assert(tte.static_value() != ValueC.VALUE_NONE);
+                    evalMargin = tte.static_value_margin();
+                    ss[ssPos].eval = bestValue = tte.static_value();
                 }
                 else
                     ss[ssPos].eval = bestValue = Evaluate.do_evaluate(false, pos, ref evalMargin);
@@ -1362,7 +1364,7 @@ namespace Portfish
                 // Stand pat. Return immediately if static value is at least beta
                 if (bestValue >= beta)
                 {
-                    if (!tte.HasValue)
+                    if (!tteHasValue)
                         TT.store(pos.key(), value_to_tt(bestValue, ss[ssPos].ply), Bound.BOUND_LOWER, DepthC.DEPTH_NONE, MoveC.MOVE_NONE, ss[ssPos].eval, evalMargin);
 
                     return bestValue;

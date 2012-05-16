@@ -75,6 +75,8 @@ namespace Portfish
     /// TTCluster objects, and a few methods for writing and reading entries.
     internal static class TT
     {
+        internal static TTEntry StaticEntry = new TTEntry();
+
         internal static UInt32 size = 0;
         internal static UInt32 sizeMask = 0;
         internal static TTEntry[] entries = null;
@@ -161,7 +163,7 @@ namespace Portfish
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        internal static TTEntry? probe(Key posKey, ref UInt32 ttePos)
+        internal static bool probe(Key posKey, ref UInt32 ttePos, out TTEntry entry)
         {
             UInt32 posKey32 = (UInt32)(posKey >> 32);
             UInt32 offset = (((UInt32)posKey) & sizeMask) << 2;
@@ -171,11 +173,13 @@ namespace Portfish
                 if (entries[i].key == posKey32)
                 {
                     ttePos = i;
-                    return entries[i];
+                    entry = entries[i];
+                    return true;
                 }
             }
 
-            return null;
+            entry = StaticEntry;
+            return false;
         }
 
         /// TranspositionTable::new_search() is called at the beginning of every new
