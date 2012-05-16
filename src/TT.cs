@@ -136,18 +136,22 @@ namespace Portfish
 
             for (int i = 0; i < Constants.ClusterSize; i++)
             {
-                if ((entries[ttePos].key == 0) || entries[ttePos].key == posKey32) // Empty or overwrite old
+                TTEntry tte = entries[ttePos];
+
+                if ((tte.key == 0) || tte.key == posKey32) // Empty or overwrite old
                 {
                     // Preserve any existing ttMove
                     if (m == MoveC.MOVE_NONE)
-                        m = (Move)entries[ttePos].move16;
+                    {
+                        m = (Move)tte.move16;
+                    }
 
                     entries[ttePos].save(posKey32, v, t, d, m, generation, statV, kingD);
                     return;
                 }
 
                 // Implement replace strategy
-                if ((entries[replacePos].generation8 == generation ? 2 : 0) + (entries[ttePos].generation8 == generation || entries[ttePos].bound == 3/*Bound.BOUND_EXACT*/ ? -2 : 0) + (entries[ttePos].depth16 < entries[replacePos].depth16 ? 1 : 0) > 0)
+                if ((entries[replacePos].generation8 == generation ? 2 : 0) + (tte.generation8 == generation || tte.bound == 3/*Bound.BOUND_EXACT*/ ? -2 : 0) + (tte.depth16 < entries[replacePos].depth16 ? 1 : 0) > 0)
                 {
                     replacePos = ttePos;
                 }
