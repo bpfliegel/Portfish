@@ -75,7 +75,7 @@ namespace Portfish
     /// TTCluster objects, and a few methods for writing and reading entries.
     internal static class TT
     {
-        internal static TTEntry StaticEntry = new TTEntry();
+        internal static readonly TTEntry StaticEntry = new TTEntry();
 
         internal static UInt32 size = 0;
         internal static UInt32 sizeMask = 0;
