@@ -29,13 +29,19 @@ namespace Portfish
 
     internal static class Endgames
     {
-        private static int ValueIndex = 0;
-        private const int ValueCount = 16;
+        // Imperfect hash, masksize=4, offset=52, offsetmask = 139611588448485376
+        private static UInt32 ValueIndex = 0;
+        private const UInt32 ValueCount = 32;
+        private const UInt64 ValueOffsetMask = 139611588448485376;
+        private const UInt16 ValueOffset = 52;
         private static readonly Key[] _keyValue = new Key[ValueCount];
         private static readonly EndgameValue[] _valueValue = new EndgameValue[ValueCount];
 
-        private static int ScaleFactorIndex = 0;
-        private const int ScaleFactorCount = 12;
+        // Imperfect hash, masksize=4, offset=18, offsetmask = 8126464
+        private static UInt32 ScaleFactorIndex = 0;
+        private const UInt32 ScaleFactorCount = 32;
+        private const UInt64 ScaleFactorOffsetMask = 8126464;
+        private const UInt16 ScaleFactorOffset = 18;
         private static readonly Key[] _keyScaleFactor = new Key[ScaleFactorCount];
         private static readonly EndgameScaleFactor[] _valueScaleFactor = new EndgameScaleFactor[ScaleFactorCount];
         private static readonly Color[] _colorScaleFactor = new Color[ScaleFactorCount];
@@ -61,22 +67,21 @@ namespace Portfish
 
         internal static EndgameValue probeValue(Key key)
         {
-            for (int i = 0; i < ValueCount; i++)
+            UInt64 kHash = (key & ValueOffsetMask) >> ValueOffset;
+            if (_keyValue[kHash] == key)
             {
-                if (_keyValue[i] == key) return _valueValue[i];
+                return _valueValue[kHash];
             }
             return null;
         }
 
         internal static EndgameScaleFactor probeScaleFactor(Key key, out Color c)
         {
-            for (int i = 0; i < ScaleFactorCount; i++)
+            UInt64 kHash = (key & ScaleFactorOffsetMask) >> ScaleFactorOffset;
+            if (_keyScaleFactor[kHash] == key)
             {
-                if (_keyScaleFactor[i] == key)
-                {
-                    c = _colorScaleFactor[i];
-                    return _valueScaleFactor[i];
-                }
+                c = _colorScaleFactor[kHash];
+                return _valueScaleFactor[kHash];
             }
             c = ColorC.BLACK;
             return null;
@@ -84,25 +89,37 @@ namespace Portfish
 
         private static void AddValue(string code, EndgameValue functionWhite, EndgameValue functionBlack)
         {
-            _keyValue[ValueIndex] = key(code, ColorC.WHITE);
-            _valueValue[ValueIndex] = functionWhite;
+            Key k; UInt64 kHash;
+
+            k = key(code, ColorC.WHITE);
+            kHash = (k & ValueOffsetMask) >> ValueOffset;
+            _keyValue[kHash] = k;
+            _valueValue[kHash] = functionWhite;
             ValueIndex++;
 
-            _keyValue[ValueIndex] = key(code, ColorC.BLACK);
-            _valueValue[ValueIndex] = functionBlack;
+            k = key(code, ColorC.BLACK);
+            kHash = (k & ValueOffsetMask) >> ValueOffset;
+            _keyValue[kHash] = k;
+            _valueValue[kHash] = functionBlack;
             ValueIndex++;
         }
 
         private static void AddScaleFactor(string code, EndgameScaleFactor functionWhite, EndgameScaleFactor functionBlack)
         {
-            _keyScaleFactor[ScaleFactorIndex] = key(code, ColorC.WHITE);
-            _valueScaleFactor[ScaleFactorIndex] = functionWhite;
-            _colorScaleFactor[ScaleFactorIndex] = ColorC.WHITE;
+            Key k; UInt64 kHash;
+
+            k = key(code, ColorC.WHITE);
+            kHash = (k & ScaleFactorOffsetMask) >> ScaleFactorOffset;
+            _keyScaleFactor[kHash] = k;
+            _valueScaleFactor[kHash] = functionWhite;
+            _colorScaleFactor[kHash] = ColorC.WHITE;
             ScaleFactorIndex++;
 
-            _keyScaleFactor[ScaleFactorIndex] = key(code, ColorC.BLACK);
-            _valueScaleFactor[ScaleFactorIndex] = functionBlack;
-            _colorScaleFactor[ScaleFactorIndex] = ColorC.BLACK;
+            k = key(code, ColorC.BLACK);
+            kHash = (k & ScaleFactorOffsetMask) >> ScaleFactorOffset;
+            _keyScaleFactor[kHash] = k;
+            _valueScaleFactor[kHash] = functionBlack;
+            _colorScaleFactor[kHash] = ColorC.BLACK;
             ScaleFactorIndex++;
         }
 
