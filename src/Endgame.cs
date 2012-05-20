@@ -29,9 +29,16 @@ namespace Portfish
 
     internal static class Endgames
     {
-        private static readonly Dictionary<Key, EndgameValue> _dictValue = new Dictionary<Bitboard, EndgameValue>();
-        private static readonly Dictionary<Key, EndgameScaleFactor> _dictScaleFactor = new Dictionary<Bitboard, EndgameScaleFactor>();
-        private static readonly Dictionary<Key, Color> _dictScaleFactorColor = new Dictionary<Bitboard, Color>();
+        private static int ValueIndex = 0;
+        private const int ValueCount = 16;
+        private static readonly Key[] _keyValue = new Key[ValueCount];
+        private static readonly EndgameValue[] _valueValue = new EndgameValue[ValueCount];
+
+        private static int ScaleFactorIndex = 0;
+        private const int ScaleFactorCount = 12;
+        private static readonly Key[] _keyScaleFactor = new Key[ScaleFactorCount];
+        private static readonly EndgameScaleFactor[] _valueScaleFactor = new EndgameScaleFactor[ScaleFactorCount];
+        private static readonly Color[] _colorScaleFactor = new Color[ScaleFactorCount];
 
         // Get the material key of a Position out of the given endgame key code
         // like "KBPKN". The trick here is to first forge an ad-hoc fen string
@@ -54,34 +61,49 @@ namespace Portfish
 
         internal static EndgameValue probeValue(Key key)
         {
-            if (_dictValue.ContainsKey(key)) return (_dictValue[key]);
+            for (int i = 0; i < ValueCount; i++)
+            {
+                if (_keyValue[i] == key) return _valueValue[i];
+            }
             return null;
         }
 
-        internal static EndgameScaleFactor probeScaleFactor(Key key)
+        internal static EndgameScaleFactor probeScaleFactor(Key key, out Color c)
         {
-            if (_dictScaleFactor.ContainsKey(key)) return (_dictScaleFactor[key]);
+            for (int i = 0; i < ScaleFactorCount; i++)
+            {
+                if (_keyScaleFactor[i] == key)
+                {
+                    c = _colorScaleFactor[i];
+                    return _valueScaleFactor[i];
+                }
+            }
+            c = ColorC.BLACK;
             return null;
-        }
-
-        internal static Color probeStrongerSideScaleFactor(Key key)
-        {
-            if (_dictScaleFactorColor.ContainsKey(key)) return _dictScaleFactorColor[key];
-            return -1;
         }
 
         private static void AddValue(string code, EndgameValue functionWhite, EndgameValue functionBlack)
         {
-            _dictValue.Add(key(code, ColorC.WHITE), functionWhite);
-            _dictValue.Add(key(code, ColorC.BLACK), functionBlack);
+            _keyValue[ValueIndex] = key(code, ColorC.WHITE);
+            _valueValue[ValueIndex] = functionWhite;
+            ValueIndex++;
+
+            _keyValue[ValueIndex] = key(code, ColorC.BLACK);
+            _valueValue[ValueIndex] = functionBlack;
+            ValueIndex++;
         }
 
         private static void AddScaleFactor(string code, EndgameScaleFactor functionWhite, EndgameScaleFactor functionBlack)
         {
-            _dictScaleFactor.Add(key(code, ColorC.WHITE), functionWhite);
-            _dictScaleFactor.Add(key(code, ColorC.BLACK), functionBlack);
-            _dictScaleFactorColor.Add(key(code, ColorC.WHITE), ColorC.WHITE);
-            _dictScaleFactorColor.Add(key(code, ColorC.BLACK), ColorC.BLACK);
+            _keyScaleFactor[ScaleFactorIndex] = key(code, ColorC.WHITE);
+            _valueScaleFactor[ScaleFactorIndex] = functionWhite;
+            _colorScaleFactor[ScaleFactorIndex] = ColorC.WHITE;
+            ScaleFactorIndex++;
+
+            _keyScaleFactor[ScaleFactorIndex] = key(code, ColorC.BLACK);
+            _valueScaleFactor[ScaleFactorIndex] = functionBlack;
+            _colorScaleFactor[ScaleFactorIndex] = ColorC.BLACK;
+            ScaleFactorIndex++;
         }
 
         internal static void InitEndgames()

@@ -298,10 +298,10 @@ namespace Portfish
             // We face problems when there are several conflicting applicable
             // scaling functions and we need to decide which one to use.
             EndgameScaleFactor sf;
-
-            if ((sf = Endgames.probeScaleFactor(key)) != null)
+            Color c;
+            if ((sf = Endgames.probeScaleFactor(key, out c)) != null)
             {
-                if (Endgames.probeStrongerSideScaleFactor(key) == ColorC.WHITE)
+                if (c == ColorC.WHITE)
                 {
                     e.scalingFunctionWHITE = sf;
                 }
