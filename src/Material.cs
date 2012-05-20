@@ -43,19 +43,6 @@ namespace Portfish
         internal int spaceWeight;
         internal Phase gamePhase;
 
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal void reset()
-        {
-            // Will be overwritten on init anyway, don't care
-            //key = 0; factorWHITE = 0; factorBLACK = 0; gamePhase = 0;
-            value = 0;
-            evaluationFunction = null;
-            scalingFunctionWHITE = null; scalingFunctionBLACK = null;
-            spaceWeight = 0;
-        }
-
         /// MaterialEntry::scale_factor takes a position and a color as input, and
         /// returns a scale factor for the given color. We have to provide the
         /// position in addition to the color, because the scale factor need not
@@ -246,21 +233,6 @@ namespace Portfish
             return value;
         }
 
-        /// MaterialTable::game_phase() calculates the phase given the current
-        /// position. Because the phase is strictly a function of the material, it
-        /// is stored in MaterialInfo.
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        Phase game_phase(Position pos)
-        {
-            Value npm = pos.non_pawn_material(ColorC.WHITE) + pos.non_pawn_material(ColorC.BLACK);
-
-            return npm >= MidgameLimit ? PhaseC.PHASE_MIDGAME
-                  : npm <= EndgameLimit ? PhaseC.PHASE_ENDGAME
-                  : (((npm - EndgameLimit) * 128) / (MidgameLimit - EndgameLimit));
-        }
-
         /// MaterialTable::material_info() takes a position object as input,
         /// computes or looks up a MaterialInfo object, and returns a pointer to it.
         /// If the material configuration is not already present in the table, it
@@ -277,12 +249,15 @@ namespace Portfish
             if (e.key == key) return;
 
             // Initialize MaterialInfo entry
-            e.reset();
+            Value npm = pos.non_pawn_material(ColorC.WHITE) + pos.non_pawn_material(ColorC.BLACK);
+            e.value = 0;
+            e.scalingFunctionWHITE = null; e.scalingFunctionBLACK = null;
+            e.spaceWeight = 0;
             e.key = key;
             e.factorWHITE = e.factorBLACK = ScaleFactorC.SCALE_FACTOR_NORMAL;
-
-            // Store game phase
-            e.gamePhase = game_phase(pos);
+            e.gamePhase = npm >= MidgameLimit ? PhaseC.PHASE_MIDGAME
+                  : npm <= EndgameLimit ? PhaseC.PHASE_ENDGAME
+                  : (((npm - EndgameLimit) * 128) / (MidgameLimit - EndgameLimit));
 
             // Let's look if we have a specialized evaluation function for this
             // particular material configuration. First we look for a fixed
