@@ -24,8 +24,8 @@ using System.Runtime.CompilerServices;
 
 namespace Portfish
 {
-    internal delegate Value EndgameValue(Position pos);
-    internal delegate ScaleFactor EndgameScaleFactor(Position pos);
+    internal delegate Value EndgameValue(Color c, Position pos);
+    internal delegate ScaleFactor EndgameScaleFactor(Color c, Position pos);
 
     internal static class Endgames
     {
@@ -36,6 +36,7 @@ namespace Portfish
         private const UInt16 ValueOffset = 52;
         private static readonly Key[] _keyValue = new Key[ValueCount];
         private static readonly EndgameValue[] _valueValue = new EndgameValue[ValueCount];
+        private static readonly Color[] _colorValue = new Color[ValueCount];
 
         // Imperfect hash, masksize=4, offset=18, offsetmask = 8126464
         private static UInt32 ScaleFactorIndex = 0;
@@ -65,13 +66,15 @@ namespace Portfish
             return new Position(fen, false, null).material_key();
         }
 
-        internal static EndgameValue probeValue(Key key)
+        internal static EndgameValue probeValue(Key key, out Color c)
         {
             UInt64 kHash = (key & ValueOffsetMask) >> ValueOffset;
             if (_keyValue[kHash] == key)
             {
+                c = _colorValue[kHash];
                 return _valueValue[kHash];
             }
+            c = ColorC.BLACK;
             return null;
         }
 
@@ -87,59 +90,61 @@ namespace Portfish
             return null;
         }
 
-        private static void AddValue(string code, EndgameValue functionWhite, EndgameValue functionBlack)
+        private static void AddValue(string code, EndgameValue function)
         {
             Key k; UInt64 kHash;
 
             k = key(code, ColorC.WHITE);
             kHash = (k & ValueOffsetMask) >> ValueOffset;
             _keyValue[kHash] = k;
-            _valueValue[kHash] = functionWhite;
+            _valueValue[kHash] = function;
+            _colorValue[kHash] = ColorC.WHITE;
             ValueIndex++;
 
             k = key(code, ColorC.BLACK);
             kHash = (k & ValueOffsetMask) >> ValueOffset;
             _keyValue[kHash] = k;
-            _valueValue[kHash] = functionBlack;
+            _valueValue[kHash] = function;
+            _colorValue[kHash] = ColorC.BLACK;
             ValueIndex++;
         }
 
-        private static void AddScaleFactor(string code, EndgameScaleFactor functionWhite, EndgameScaleFactor functionBlack)
+        private static void AddScaleFactor(string code, EndgameScaleFactor function)
         {
             Key k; UInt64 kHash;
 
             k = key(code, ColorC.WHITE);
             kHash = (k & ScaleFactorOffsetMask) >> ScaleFactorOffset;
             _keyScaleFactor[kHash] = k;
-            _valueScaleFactor[kHash] = functionWhite;
+            _valueScaleFactor[kHash] = function;
             _colorScaleFactor[kHash] = ColorC.WHITE;
             ScaleFactorIndex++;
 
             k = key(code, ColorC.BLACK);
             kHash = (k & ScaleFactorOffsetMask) >> ScaleFactorOffset;
             _keyScaleFactor[kHash] = k;
-            _valueScaleFactor[kHash] = functionBlack;
+            _valueScaleFactor[kHash] = function;
             _colorScaleFactor[kHash] = ColorC.BLACK;
             ScaleFactorIndex++;
         }
 
         internal static void InitEndgames()
         {
-            AddValue("KPK", Endgame.Endgame_KPK_WHITE, Endgame.Endgame_KPK_BLACK);
-            AddValue("KNNK", Endgame.Endgame_KNNK_WHITE, Endgame.Endgame_KNNK_BLACK);
-            AddValue("KBNK", Endgame.Endgame_KBNK_WHITE, Endgame.Endgame_KBNK_BLACK);
-            AddValue("KRKP", Endgame.Endgame_KRKP_WHITE, Endgame.Endgame_KRKP_BLACK);
-            AddValue("KRKB", Endgame.Endgame_KRKB_WHITE, Endgame.Endgame_KRKB_BLACK);
-            AddValue("KRKN", Endgame.Endgame_KRKN_WHITE, Endgame.Endgame_KRKN_BLACK);
-            AddValue("KQKR", Endgame.Endgame_KQKR_WHITE, Endgame.Endgame_KQKR_BLACK);
-            AddValue("KBBKN", Endgame.Endgame_KBBKN_WHITE, Endgame.Endgame_KBBKN_BLACK);
+            AddValue("KPK", Endgame.Endgame_KPK);
+            AddValue("KNNK", Endgame.Endgame_KNNK);
+            AddValue("KBNK", Endgame.Endgame_KBNK);
+            AddValue("KRKP", Endgame.Endgame_KRKP);
+            AddValue("KRKB", Endgame.Endgame_KRKB);
+            AddValue("KRKN", Endgame.Endgame_KRKN);
+            AddValue("KQKR", Endgame.Endgame_KQKR);
+            AddValue("KBBKN", Endgame.Endgame_KBBKN);
 
-            AddScaleFactor("KNPK", Endgame.Endgame_KNPK_WHITE, Endgame.Endgame_KNPK_BLACK);
-            AddScaleFactor("KRPKR", Endgame.Endgame_KRPKR_WHITE, Endgame.Endgame_KRPKR_BLACK);
-            AddScaleFactor("KBPKB", Endgame.Endgame_KBPKB_WHITE, Endgame.Endgame_KBPKB_BLACK);
-            AddScaleFactor("KBPKN", Endgame.Endgame_KBPKN_WHITE, Endgame.Endgame_KBPKN_BLACK);
-            AddScaleFactor("KBPPKB", Endgame.Endgame_KBPPKB_WHITE, Endgame.Endgame_KBPPKB_BLACK);
-            AddScaleFactor("KRPPKRP", Endgame.Endgame_KRPPKRP_WHITE, Endgame.Endgame_KRPPKRP_BLACK);
+            AddScaleFactor("KNPK", Endgame.Endgame_KNPK);
+            AddScaleFactor("KRPKR", Endgame.Endgame_KRPKR);
+            AddScaleFactor("KBPKB", Endgame.Endgame_KBPKB);
+            AddScaleFactor("KBPKN", Endgame.Endgame_KBPKN);
+            AddScaleFactor("KBPPKB", Endgame.Endgame_KBPPKB);
+            AddScaleFactor("KRPPKRP", Endgame.Endgame_KRPPKRP);
         }
     }
 
@@ -185,15 +190,9 @@ namespace Portfish
         /// attacking side a bonus for driving the defending king towards the edge
         /// of the board, and for keeping the distance between the two kings small.
         /// KXK
-        internal static Value Endgame_KXK_WHITE(Position pos) { return Endgame_KXK(ColorC.WHITE, pos); }
-        internal static Value Endgame_KXK_BLACK(Position pos) { return Endgame_KXK(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static Value Endgame_KXK(Color c, Position pos)
+        internal static Value Endgame_KXK(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(weakerSide) == ValueC.VALUE_ZERO);
             Debug.Assert(pos.piece_count(weakerSide, PieceTypeC.PAWN) == ValueC.VALUE_ZERO);
@@ -232,15 +231,9 @@ namespace Portfish
 
         /// Mate with KBN vs K. This is similar to KX vs K, but we have to drive the
         /// defending king towards a corner square of the right color.
-        internal static Value Endgame_KBNK_WHITE(Position pos) { return Endgame_KBNK(ColorC.WHITE, pos); }
-        internal static Value Endgame_KBNK_BLACK(Position pos) { return Endgame_KBNK(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static Value Endgame_KBNK(Color c, Position pos)
+        internal static Value Endgame_KBNK(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(weakerSide) == ValueC.VALUE_ZERO);
             Debug.Assert(pos.piece_count(weakerSide, PieceTypeC.PAWN) == ValueC.VALUE_ZERO);
@@ -270,15 +263,9 @@ namespace Portfish
         }
 
         /// KP vs K. This endgame is evaluated with the help of a bitbase.
-        internal static Value Endgame_KPK_WHITE(Position pos) { return Endgame_KPK(ColorC.WHITE, pos); }
-        internal static Value Endgame_KPK_BLACK(Position pos) { return Endgame_KPK(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static Value Endgame_KPK(Color c, Position pos)
+        internal static Value Endgame_KPK(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == ValueC.VALUE_ZERO);
             Debug.Assert(pos.non_pawn_material(weakerSide) == ValueC.VALUE_ZERO);
@@ -324,15 +311,9 @@ namespace Portfish
         /// a bitbase. The function below returns drawish scores when the pawn is
         /// far advanced with support of the king, while the attacking king is far
         /// away.
-        internal static Value Endgame_KRKP_WHITE(Position pos) { return Endgame_KRKP(ColorC.WHITE, pos); }
-        internal static Value Endgame_KRKP_BLACK(Position pos) { return Endgame_KRKP(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static Value Endgame_KRKP(Color c, Position pos)
+        internal static Value Endgame_KRKP(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.RookValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.PAWN) == 0);
@@ -387,15 +368,9 @@ namespace Portfish
 
         /// KR vs KB. This is very simple, and always returns drawish scores.  The
         /// score is slightly bigger when the defending king is close to the edge.
-        internal static Value Endgame_KRKB_WHITE(Position pos) { return Endgame_KRKB(ColorC.WHITE, pos); }
-        internal static Value Endgame_KRKB_BLACK(Position pos) { return Endgame_KRKB(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static Value Endgame_KRKB(Color c, Position pos)
+        internal static Value Endgame_KRKB(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.RookValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.PAWN) == 0);
@@ -409,15 +384,9 @@ namespace Portfish
 
         /// KR vs KN.  The attacking side has slightly better winning chances than
         /// in KR vs KB, particularly if the king and the knight are far apart.
-        internal static Value Endgame_KRKN_WHITE(Position pos) { return Endgame_KRKN(ColorC.WHITE, pos); }
-        internal static Value Endgame_KRKN_BLACK(Position pos) { return Endgame_KRKN(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static Value Endgame_KRKN(Color c, Position pos)
+        internal static Value Endgame_KRKN(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.RookValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.PAWN) == 0);
@@ -436,15 +405,9 @@ namespace Portfish
         /// defending king towards the edge.  If we also take care to avoid null move
         /// for the defending side in the search, this is usually sufficient to be
         /// able to win KQ vs KR.
-        internal static Value Endgame_KQKR_WHITE(Position pos) { return Endgame_KQKR(ColorC.WHITE, pos); }
-        internal static Value Endgame_KQKR_BLACK(Position pos) { return Endgame_KQKR(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static Value Endgame_KQKR(Color c, Position pos)
+        internal static Value Endgame_KQKR(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.QueenValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.PAWN) == 0);
@@ -462,15 +425,9 @@ namespace Portfish
             return strongerSide == pos.sideToMove ? result : -result;
         }
 
-        internal static Value Endgame_KBBKN_WHITE(Position pos) { return Endgame_KBBKN(ColorC.WHITE, pos); }
-        internal static Value Endgame_KBBKN_BLACK(Position pos) { return Endgame_KBBKN(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static Value Endgame_KBBKN(Color c, Position pos)
+        internal static Value Endgame_KBBKN(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.BISHOP) == 2);
             Debug.Assert(pos.non_pawn_material(strongerSide) == 2 * Constants.BishopValueMidgame);
@@ -497,22 +454,12 @@ namespace Portfish
 
         /// K and two minors vs K and one or two minors or K and two knights against
         /// king alone are always draw.
-        internal static Value Endgame_KmmKm_WHITE(Position pos) { return Endgame_KmmKm(ColorC.WHITE, pos); }
-        internal static Value Endgame_KmmKm_BLACK(Position pos) { return Endgame_KmmKm(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static Value Endgame_KmmKm(Color c, Position pos)
+        internal static Value Endgame_KmmKm(Color strongerSide, Position pos)
         {
             return ValueC.VALUE_DRAW;
         }
 
-        internal static Value Endgame_KNNK_WHITE(Position pos) { return Endgame_KNNK(ColorC.WHITE, pos); }
-        internal static Value Endgame_KNNK_BLACK(Position pos) { return Endgame_KNNK(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static Value Endgame_KNNK(Color c, Position pos)
+        internal static Value Endgame_KNNK(Color strongerSide, Position pos)
         {
             return ValueC.VALUE_DRAW;
         }
@@ -521,15 +468,9 @@ namespace Portfish
         /// a bishop of the wrong color. If such a draw is detected, SCALE_FACTOR_DRAW
         /// is returned. If not, the return value is SCALE_FACTOR_NONE, i.e. no scaling
         /// will be used.
-        internal static ScaleFactor Endgame_KBPsK_WHITE(Position pos) { return Endgame_KBPsK(ColorC.WHITE, pos); }
-        internal static ScaleFactor Endgame_KBPsK_BLACK(Position pos) { return Endgame_KBPsK(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static ScaleFactor Endgame_KBPsK(Color c, Position pos)
+        internal static ScaleFactor Endgame_KBPsK(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.BishopValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.BISHOP) == 1);
@@ -579,15 +520,9 @@ namespace Portfish
 
         /// K and queen vs K, rook and one or more pawns. It tests for fortress draws with
         /// a rook on the third rank defended by a pawn.
-        internal static ScaleFactor Endgame_KQKRPs_WHITE(Position pos) { return Endgame_KQKRPs(ColorC.WHITE, pos); }
-        internal static ScaleFactor Endgame_KQKRPs_BLACK(Position pos) { return Endgame_KQKRPs(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static ScaleFactor Endgame_KQKRPs(Color c, Position pos)
+        internal static ScaleFactor Endgame_KQKRPs(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.QueenValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.QUEEN) == 1);
@@ -616,15 +551,9 @@ namespace Portfish
         ///
         /// It would also be nice to rewrite the actual code for this function,
         /// which is mostly copied from Glaurung 1.x, and not very pretty.
-        internal static ScaleFactor Endgame_KRPKR_WHITE(Position pos) { return Endgame_KRPKR(ColorC.WHITE, pos); }
-        internal static ScaleFactor Endgame_KRPKR_BLACK(Position pos) { return Endgame_KRPKR(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static ScaleFactor Endgame_KRPKR(Color c, Position pos)
+        internal static ScaleFactor Endgame_KRPKR(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.RookValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.PAWN) == 1);
@@ -740,15 +669,9 @@ namespace Portfish
         /// K, rook and two pawns vs K, rook and one pawn. There is only a single
         /// pattern: If the stronger side has no passed pawns and the defending king
         /// is actively placed, the position is drawish.
-        internal static ScaleFactor Endgame_KRPPKRP_WHITE(Position pos) { return Endgame_KRPPKRP(ColorC.WHITE, pos); }
-        internal static ScaleFactor Endgame_KRPPKRP_BLACK(Position pos) { return Endgame_KRPPKRP(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static ScaleFactor Endgame_KRPPKRP(Color c, Position pos)
+        internal static ScaleFactor Endgame_KRPPKRP(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.RookValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.PAWN) == 2);
@@ -785,15 +708,9 @@ namespace Portfish
 
         /// K and two or more pawns vs K. There is just a single rule here: If all pawns
         /// are on the same rook file and are blocked by the defending king, it's a draw.
-        internal static ScaleFactor Endgame_KPsK_WHITE(Position pos) { return Endgame_KPsK(ColorC.WHITE, pos); }
-        internal static ScaleFactor Endgame_KPsK_BLACK(Position pos) { return Endgame_KPsK(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static ScaleFactor Endgame_KPsK(Color c, Position pos)
+        internal static ScaleFactor Endgame_KPsK(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == ValueC.VALUE_ZERO);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.PAWN) >= 2);
@@ -828,15 +745,9 @@ namespace Portfish
         /// king is somewhere along the path of the pawn, and the square of the king is
         /// not of the same color as the stronger side's bishop, it's a draw. If the two
         /// bishops have opposite color, it's almost always a draw.
-        internal static ScaleFactor Endgame_KBPKB_WHITE(Position pos) { return Endgame_KBPKB(ColorC.WHITE, pos); }
-        internal static ScaleFactor Endgame_KBPKB_BLACK(Position pos) { return Endgame_KBPKB(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static ScaleFactor Endgame_KBPKB(Color c, Position pos)
+        internal static ScaleFactor Endgame_KBPKB(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.BishopValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.BISHOP) == 1);
@@ -889,15 +800,9 @@ namespace Portfish
 
         /// K, bishop and two pawns vs K and bishop. It detects a few basic draws with
         /// opposite-colored bishops.
-        internal static ScaleFactor Endgame_KBPPKB_WHITE(Position pos) { return Endgame_KBPPKB(ColorC.WHITE, pos); }
-        internal static ScaleFactor Endgame_KBPPKB_BLACK(Position pos) { return Endgame_KBPPKB(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static ScaleFactor Endgame_KBPPKB(Color c, Position pos)
+        internal static ScaleFactor Endgame_KBPPKB(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.BishopValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.BISHOP) == 1);
@@ -970,15 +875,9 @@ namespace Portfish
         /// K, bishop and a pawn vs K and knight. There is a single rule: If the defending
         /// king is somewhere along the path of the pawn, and the square of the king is
         /// not of the same color as the stronger side's bishop, it's a draw.
-        internal static ScaleFactor Endgame_KBPKN_WHITE(Position pos) { return Endgame_KBPKN(ColorC.WHITE, pos); }
-        internal static ScaleFactor Endgame_KBPKN_BLACK(Position pos) { return Endgame_KBPKN(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static ScaleFactor Endgame_KBPKN(Color c, Position pos)
+        internal static ScaleFactor Endgame_KBPKN(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.BishopValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.BISHOP) == 1);
@@ -1003,15 +902,9 @@ namespace Portfish
         /// K, knight and a pawn vs K. There is a single rule: If the pawn is a rook pawn
         /// on the 7th rank and the defending king prevents the pawn from advancing, the
         /// position is drawn.
-        internal static ScaleFactor Endgame_KNPK_WHITE(Position pos) { return Endgame_KNPK(ColorC.WHITE, pos); }
-        internal static ScaleFactor Endgame_KNPK_BLACK(Position pos) { return Endgame_KNPK(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static ScaleFactor Endgame_KNPK(Color c, Position pos)
+        internal static ScaleFactor Endgame_KNPK(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == Constants.KnightValueMidgame);
             Debug.Assert(pos.piece_count(strongerSide, PieceTypeC.KNIGHT) == 1);
@@ -1038,15 +931,9 @@ namespace Portfish
         /// the pawn, she probably has at least a draw with the pawn as well. The exception
         /// is when the stronger side's pawn is far advanced and not on a rook file; in
         /// this case it is often possible to win (e.g. 8/4k3/3p4/3P4/6K1/8/8/8 w - - 0 1).
-        internal static ScaleFactor Endgame_KPKP_WHITE(Position pos) { return Endgame_KPKP(ColorC.WHITE, pos); }
-        internal static ScaleFactor Endgame_KPKP_BLACK(Position pos) { return Endgame_KPKP(ColorC.BLACK, pos); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static ScaleFactor Endgame_KPKP(Color c, Position pos)
+        internal static ScaleFactor Endgame_KPKP(Color strongerSide, Position pos)
         {
-            Color strongerSide = c;
-            Color weakerSide = Utils.flip_C(c);
+            Color weakerSide = strongerSide ^ 1;
 
             Debug.Assert(pos.non_pawn_material(strongerSide) == ValueC.VALUE_ZERO);
             Debug.Assert(pos.non_pawn_material(weakerSide) == ValueC.VALUE_ZERO);

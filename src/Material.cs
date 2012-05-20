@@ -39,6 +39,7 @@ namespace Portfish
         internal Int16 value;
         internal byte factorWHITE, factorBLACK;
         internal EndgameValue evaluationFunction;
+        internal Color evaluationFunctionColor;
         internal EndgameScaleFactor scalingFunctionWHITE, scalingFunctionBLACK;
         internal int spaceWeight;
         internal Phase gamePhase;
@@ -58,7 +59,7 @@ namespace Portfish
             if (scalingFunctionWHITE == null)
                 return factorWHITE;
 
-            ScaleFactor sf = scalingFunctionWHITE(pos);
+            ScaleFactor sf = scalingFunctionWHITE(ColorC.WHITE, pos);
             return sf == ScaleFactorC.SCALE_FACTOR_NONE ? factorWHITE : sf;
         }
 
@@ -70,7 +71,7 @@ namespace Portfish
             if (scalingFunctionBLACK == null)
                 return (factorBLACK);
 
-            ScaleFactor sf = scalingFunctionBLACK(pos);
+            ScaleFactor sf = scalingFunctionBLACK(ColorC.BLACK, pos);
             return sf == ScaleFactorC.SCALE_FACTOR_NONE ? factorBLACK : sf;
         }
 
@@ -79,7 +80,7 @@ namespace Portfish
 #endif
         internal Value evaluate(Position pos)
         {
-            return evaluationFunction(pos);
+            return evaluationFunction(evaluationFunctionColor, pos);
         }
 
 #if AGGR_INLINE
@@ -149,16 +150,6 @@ namespace Portfish
         internal static readonly int[][] QuadraticCoefficientsOppositeColor = new int[][] {
          new int[]{ 41, 41, 41, 41, 41, 41 }, new int[]{ 37, 41, 41, 41, 41, 41 }, new int[]{ 10, 62, 41, 41, 41, 41 },
          new int[]{ 57, 64, 39, 41, 41, 41 }, new int[]{ 50, 40, 23, -22, 41, 41 }, new int[]{ 106, 101, 3, 151, 171, 41 } };
-
-        // Endgame evaluation and scaling functions accessed direcly and not through
-        // the function maps because correspond to more then one material hash key.
-        private static readonly EndgameValue[] EvaluateKmmKm = new EndgameValue[] { Endgame.Endgame_KmmKm_WHITE, Endgame.Endgame_KmmKm_BLACK };
-        private static readonly EndgameValue[] EvaluateKXK = new EndgameValue[] { Endgame.Endgame_KXK_WHITE, Endgame.Endgame_KXK_BLACK };
-
-        private static readonly EndgameScaleFactor[] ScaleKBPsK = new EndgameScaleFactor[] { Endgame.Endgame_KBPsK_WHITE, Endgame.Endgame_KBPsK_BLACK };
-        private static readonly EndgameScaleFactor[] ScaleKQKRPs = new EndgameScaleFactor[] { Endgame.Endgame_KQKRPs_WHITE, Endgame.Endgame_KQKRPs_BLACK };
-        private static readonly EndgameScaleFactor[] ScaleKPsK = new EndgameScaleFactor[] { Endgame.Endgame_KPsK_WHITE, Endgame.Endgame_KPsK_BLACK };
-        private static readonly EndgameScaleFactor[] ScaleKPKP = new EndgameScaleFactor[] { Endgame.Endgame_KPKP_WHITE, Endgame.Endgame_KPKP_BLACK };
 
         private readonly int[][] pieceCount = new int[2][];
 
@@ -262,18 +253,20 @@ namespace Portfish
             // Let's look if we have a specialized evaluation function for this
             // particular material configuration. First we look for a fixed
             // configuration one, then a generic one if previous search failed.
-            if ((e.evaluationFunction = Endgames.probeValue(key)) != null)
+            if ((e.evaluationFunction = Endgames.probeValue(key, out e.evaluationFunctionColor)) != null)
                 return;
 
             if (is_KXK(ColorC.WHITE, pos))
             {
-                e.evaluationFunction = EvaluateKXK[ColorC.WHITE];
+                e.evaluationFunction = Endgame.Endgame_KXK;
+                e.evaluationFunctionColor = ColorC.WHITE;
                 return;
             }
 
             if (is_KXK(ColorC.BLACK, pos))
             {
-                e.evaluationFunction = EvaluateKXK[ColorC.BLACK];
+                e.evaluationFunction = Endgame.Endgame_KXK;
+                e.evaluationFunctionColor = ColorC.BLACK;
                 return;
             }
 
@@ -287,7 +280,8 @@ namespace Portfish
                 if (pos.piece_count(ColorC.WHITE, PieceTypeC.BISHOP) + pos.piece_count(ColorC.WHITE, PieceTypeC.KNIGHT) <= 2
                     && pos.piece_count(ColorC.BLACK, PieceTypeC.BISHOP) + pos.piece_count(ColorC.BLACK, PieceTypeC.KNIGHT) <= 2)
                 {
-                    e.evaluationFunction = EvaluateKmmKm[pos.sideToMove];
+                    e.evaluationFunction = Endgame.Endgame_KmmKm;
+                    e.evaluationFunctionColor = pos.sideToMove;
                     return;
                 }
             }
@@ -316,16 +310,16 @@ namespace Portfish
             // distribution. Should be probed after the specialized ones.
             // Note that these ones don't return after setting the function.
             if (is_KBPsKs(ColorC.WHITE, pos))
-                e.scalingFunctionWHITE = ScaleKBPsK[ColorC.WHITE];
+                e.scalingFunctionWHITE = Endgame.Endgame_KBPsK;
 
             if (is_KBPsKs(ColorC.BLACK, pos))
-                e.scalingFunctionBLACK = ScaleKBPsK[ColorC.BLACK];
+                e.scalingFunctionBLACK = Endgame.Endgame_KBPsK;
 
             if (is_KQKRPs(ColorC.WHITE, pos))
-                e.scalingFunctionWHITE = ScaleKQKRPs[ColorC.WHITE];
+                e.scalingFunctionWHITE = Endgame.Endgame_KQKRPs;
 
             else if (is_KQKRPs(ColorC.BLACK, pos))
-                e.scalingFunctionBLACK = ScaleKQKRPs[ColorC.BLACK];
+                e.scalingFunctionBLACK = Endgame.Endgame_KQKRPs;
 
             Value npm_w = pos.non_pawn_material(ColorC.WHITE);
             Value npm_b = pos.non_pawn_material(ColorC.BLACK);
@@ -335,19 +329,19 @@ namespace Portfish
                 if (pos.piece_count(ColorC.BLACK, PieceTypeC.PAWN) == 0)
                 {
                     Debug.Assert(pos.piece_count(ColorC.WHITE, PieceTypeC.PAWN) >= 2);
-                    e.scalingFunctionWHITE = ScaleKPsK[ColorC.WHITE];
+                    e.scalingFunctionWHITE = Endgame.Endgame_KPsK;
                 }
                 else if (pos.piece_count(ColorC.WHITE, PieceTypeC.PAWN) == 0)
                 {
                     Debug.Assert(pos.piece_count(ColorC.BLACK, PieceTypeC.PAWN) >= 2);
-                    e.scalingFunctionBLACK = ScaleKPsK[ColorC.BLACK];
+                    e.scalingFunctionBLACK = Endgame.Endgame_KPsK;
                 }
                 else if (pos.piece_count(ColorC.WHITE, PieceTypeC.PAWN) == 1 && pos.piece_count(ColorC.BLACK, PieceTypeC.PAWN) == 1)
                 {
                     // This is a special case because we set scaling functions
                     // for both colors instead of only one.
-                    e.scalingFunctionWHITE = ScaleKPKP[ColorC.WHITE];
-                    e.scalingFunctionBLACK = ScaleKPKP[ColorC.BLACK];
+                    e.scalingFunctionWHITE = Endgame.Endgame_KPKP;
+                    e.scalingFunctionBLACK = Endgame.Endgame_KPKP;
                 }
             }
 

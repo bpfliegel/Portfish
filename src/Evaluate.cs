@@ -338,7 +338,7 @@ namespace Portfish
             if (ei.mi.evaluationFunction != null)
             {
                 margin = ValueC.VALUE_ZERO;
-                Value retval = ei.mi.evaluationFunction(pos);
+                Value retval = ei.mi.evaluationFunction(ei.mi.evaluationFunctionColor, pos);
                 ei.pi = null; ei.mi = null;
                 EvalInfoBroker.Free(ei);
                 return retval;
