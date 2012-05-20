@@ -330,7 +330,7 @@ namespace Portfish
             score = pos.st.psqScore + (pos.sideToMove == ColorC.WHITE ? Tempo : -Tempo);
 
             // Probe the material hash table
-            ei.mi = pos.this_thread().materialTable.probe(pos);
+            pos.this_thread().materialTable.probe(pos, out ei.mi);
             score += ((ei.mi.value << 16) + ei.mi.value);
 
             // If we have a specialized evaluation function for the current material
@@ -345,7 +345,7 @@ namespace Portfish
             }
 
             // Probe the pawn hash table
-            ei.pi = pos.this_thread().pawnTable.probe(pos);
+            pos.this_thread().pawnTable.probe(pos, out ei.pi);
             score += ei.pi.value;
 
             // Initialize attack and king safety bitboards

@@ -266,16 +266,15 @@ namespace Portfish
         /// If the material configuration is not already present in the table, it
         /// is stored there, so we don't have to recompute everything when the
         /// same material configuration occurs again.
-        internal MaterialEntry probe(Position pos)
+        internal void probe(Position pos, out MaterialEntry e)
         {
             Key key = pos.material_key();
-            MaterialEntry e = entries[((UInt32)key) & Constants.MaterialTableMask];
+            e = entries[((UInt32)key) & Constants.MaterialTableMask];
 
             // If mi->key matches the position's material hash key, it means that we
             // have analysed this material configuration before, and we can simply
             // return the information we found the last time instead of recomputing it.
-            if (e.key == key)
-                return e;
+            if (e.key == key) return;
 
             // Initialize MaterialInfo entry
             e.reset();
@@ -289,18 +288,18 @@ namespace Portfish
             // particular material configuration. First we look for a fixed
             // configuration one, then a generic one if previous search failed.
             if ((e.evaluationFunction = Endgames.probeValue(key)) != null)
-                return e;
+                return;
 
             if (is_KXK(ColorC.WHITE, pos))
             {
                 e.evaluationFunction = EvaluateKXK[ColorC.WHITE];
-                return e;
+                return;
             }
 
             if (is_KXK(ColorC.BLACK, pos))
             {
                 e.evaluationFunction = EvaluateKXK[ColorC.BLACK];
-                return e;
+                return;
             }
 
             if ((pos.pieces_PT(PieceTypeC.PAWN) == 0) && (pos.pieces_PT(PieceTypeC.ROOK) == 0) && (pos.pieces_PT(PieceTypeC.QUEEN) == 0))
@@ -314,7 +313,7 @@ namespace Portfish
                     && pos.piece_count(ColorC.BLACK, PieceTypeC.BISHOP) + pos.piece_count(ColorC.BLACK, PieceTypeC.KNIGHT) <= 2)
                 {
                     e.evaluationFunction = EvaluateKmmKm[pos.sideToMove];
-                    return e;
+                    return;
                 }
             }
 
@@ -335,7 +334,7 @@ namespace Portfish
                 {
                     e.scalingFunctionBLACK = sf;
                 }
-                return e;
+                return;
             }
 
             // Generic scaling functions that refer to more then one material
@@ -418,7 +417,7 @@ namespace Portfish
 
             e.value = (Int16)((imbalance(ColorC.WHITE) - imbalance(ColorC.BLACK)) / 16);
 
-            return e;
+            return;
         }
     }
 }

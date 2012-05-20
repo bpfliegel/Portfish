@@ -241,18 +241,15 @@ namespace Portfish
         /// a PawnInfo object, and returns a pointer to it. The result is also stored
         /// in an hash table, so we don't have to recompute everything when the same
         /// pawn structure occurs again.
-        internal PawnEntry probe(Position pos)
+        internal void probe(Position pos, out PawnEntry e)
         {
             Key key = pos.pawn_key();
-            PawnEntry e = entries[((UInt32)key) & Constants.PawnTableMask];
+            e = entries[((UInt32)key) & Constants.PawnTableMask];
 
             // If pi.key matches the position's pawn hash key, it means that we
             // have analysed this pawn structure before, and we can simply return
             // the information we found the last time instead of recomputing it.
-            if (e.key == key)
-            {
-                return e;
-            }
+            if (e.key == key) return;
 
             // Initialize PawnInfo entry
             e.key = key;
@@ -273,7 +270,7 @@ namespace Portfish
 
             e.value = Utils.apply_weight(e.value, PawnStructureWeight);
 
-            return e;
+            return;
         }
 
         /// PawnTable::evaluate_pawns() evaluates each pawn of the given color
