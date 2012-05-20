@@ -40,7 +40,7 @@ namespace Portfish
         internal const UInt32 UInt32One = 1;
 
         // This is the number of TTEntry slots for each cluster
-        internal const int ClusterSize = 4;
+        internal const UInt32 ClusterSize = 4;
 
         internal const string endl = "\n";
 

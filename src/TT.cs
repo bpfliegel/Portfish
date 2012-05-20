@@ -134,7 +134,7 @@ namespace Portfish
             UInt32 replacePos = 0;
             ttePos = replacePos = (((UInt32)posKey) & sizeMask) << 2;
 
-            for (int i = 0; i < Constants.ClusterSize; i++)
+            for (UInt32 i = 0; i < Constants.ClusterSize; i++)
             {
                 TTEntry tte = entries[ttePos];
 
@@ -151,9 +151,37 @@ namespace Portfish
                 }
 
                 // Implement replace strategy
-                if ((entries[replacePos].generation8 == generation ? 2 : 0) + (tte.generation8 == generation || tte.bound == 3/*Bound.BOUND_EXACT*/ ? -2 : 0) + (tte.depth16 < entries[replacePos].depth16 ? 1 : 0) > 0)
+                //if ((entries[replacePos].generation8 == generation ? 2 : 0) + (tte.generation8 == generation || tte.bound == 3/*Bound.BOUND_EXACT*/ ? -2 : 0) + (tte.depth16 < entries[replacePos].depth16 ? 1 : 0) > 0)
+                //{
+                //    replacePos = ttePos;
+                //}
+
+                if (entries[replacePos].generation8 == generation)
                 {
-                    replacePos = ttePos;
+                    // +2
+                    if (tte.generation8 == generation || tte.bound == 3/*Bound.BOUND_EXACT*/)
+                    {
+                        // 0
+                        if (tte.depth16 < entries[replacePos].depth16)
+                        {
+                            // +1
+                            replacePos = ttePos;
+                        }
+                    }
+                    else
+                    {
+                        // +2
+                        replacePos = ttePos;
+                    }
+                }
+                else
+                {
+                    // 0
+                    if ((!(tte.generation8 == generation || tte.bound == 3/*Bound.BOUND_EXACT*/)) && (tte.depth16 < entries[replacePos].depth16))
+                    {
+                        // +1
+                        replacePos = ttePos;
+                    }
                 }
 
                 ttePos++;
