@@ -601,8 +601,7 @@ namespace Portfish
 #if X64
                             bb -= (bb >> 1) & 0x5555555555555555UL;
                             bb = ((bb >> 2) & 0x3333333333333333UL) + (bb & 0x3333333333333333UL);
-                            bb *= 0x1111111111111111UL;
-                            ei.kingAdjacentZoneAttacksCount[Us] += (int)(bb >> 60);
+                            ei.kingAdjacentZoneAttacksCount[Us] += (int)((bb * 0x1111111111111111UL) >> 60);
 #else
                             ei.kingAdjacentZoneAttacksCount[Us] += Bitcount.popcount_1s_Max15(bb);
 #endif
@@ -616,16 +615,14 @@ namespace Portfish
                     {
                         bmob -= (bmob >> 1) & 0x5555555555555555UL;
                         bmob = ((bmob >> 2) & 0x3333333333333333UL) + (bmob & 0x3333333333333333UL);
-                        bmob *= 0x1111111111111111UL;
-                        mob = (int)(bmob >> 60);
+                        mob = (int)((bmob * 0x1111111111111111UL) >> 60);
                     }
                     else
                     {
                         bmob -= ((bmob >> 1) & 0x5555555555555555UL);
                         bmob = ((bmob >> 2) & 0x3333333333333333UL) + (bmob & 0x3333333333333333UL);
                         bmob = ((bmob >> 4) + bmob) & 0x0F0F0F0F0F0F0F0FUL;
-                        bmob *= 0x0101010101010101UL;
-                        mob = (int)(bmob >> 56);
+                        mob = (int)((bmob * 0x0101010101010101UL) >> 56);
                     }
 #else
                     mob = (Piece != PieceTypeC.QUEEN ? Bitcount.popcount_1s_Max15(b & mobilityArea) : Bitcount.popcount_1s_Full(b & mobilityArea));
@@ -832,9 +829,8 @@ namespace Portfish
                 // king, and the quality of the pawn shelter.
                 b = undefended - ((undefended >> 1) & 0x5555555555555555UL);
                 b = ((b >> 2) & 0x3333333333333333UL) + (b & 0x3333333333333333UL);
-                b *= 0x1111111111111111UL;
                 attackUnits = Math.Min(25, (ei.kingAttackersCount[Them] * ei.kingAttackersWeight[Them]) / 2)
-                             + 3 * (ei.kingAdjacentZoneAttacksCount[Them] + ((int)(b >> 60)))
+                             + 3 * (ei.kingAdjacentZoneAttacksCount[Them] + ((int)((b * 0x1111111111111111UL) >> 60)))
                              + InitKingDanger[(ksq ^ (Us * 56))]
                              - ((((score) + 32768) & ~0xffff) / 0x10000) / 32;
 
@@ -850,9 +846,8 @@ namespace Portfish
                     {
                         b -= (b >> 1) & 0x5555555555555555UL;
                         b = ((b >> 2) & 0x3333333333333333UL) + (b & 0x3333333333333333UL);
-                        b *= 0x1111111111111111UL;
                         attackUnits += QueenContactCheckBonus
-                                      * ((int)(b >> 60))
+                                      * ((int)((b * 0x1111111111111111UL) >> 60))
                                       * (Them == pos.sideToMove ? 2 : 1);
                     }
                 }
@@ -873,9 +868,8 @@ namespace Portfish
                     {
                         b -= (b >> 1) & 0x5555555555555555UL;
                         b = ((b >> 2) & 0x3333333333333333UL) + (b & 0x3333333333333333UL);
-                        b *= 0x1111111111111111UL;
                         attackUnits += RookContactCheckBonus
-                                      * ((int)(b >> 60))
+                                      * ((int)((b * 0x1111111111111111UL) >> 60))
                                       * (Them == pos.sideToMove ? 2 : 1);
                     }
                 }
@@ -892,8 +886,7 @@ namespace Portfish
                 {
                     b -= (b >> 1) & 0x5555555555555555UL;
                     b = ((b >> 2) & 0x3333333333333333UL) + (b & 0x3333333333333333UL);
-                    b *= 0x1111111111111111UL;
-                    attackUnits += QueenCheckBonus * ((int)(b >> 60));
+                    attackUnits += QueenCheckBonus * ((int)((b * 0x1111111111111111UL) >> 60));
                 }
 
                 // Enemy rooks safe checks
@@ -902,8 +895,7 @@ namespace Portfish
                 {
                     b -= (b >> 1) & 0x5555555555555555UL;
                     b = ((b >> 2) & 0x3333333333333333UL) + (b & 0x3333333333333333UL);
-                    b *= 0x1111111111111111UL;
-                    attackUnits += RookCheckBonus * ((int)(b >> 60));
+                    attackUnits += RookCheckBonus * ((int)((b * 0x1111111111111111UL) >> 60));
                 }
 
                 // Enemy bishops safe checks
@@ -912,8 +904,7 @@ namespace Portfish
                 {
                     b -= (b >> 1) & 0x5555555555555555UL;
                     b = ((b >> 2) & 0x3333333333333333UL) + (b & 0x3333333333333333UL);
-                    b *= 0x1111111111111111UL;
-                    attackUnits += BishopCheckBonus * ((int)(b >> 60));
+                    attackUnits += BishopCheckBonus * ((int)((b * 0x1111111111111111UL) >> 60));
                 }
 
                 // Enemy knights safe checks
@@ -922,8 +913,7 @@ namespace Portfish
                 {
                     b -= (b >> 1) & 0x5555555555555555UL;
                     b = ((b >> 2) & 0x3333333333333333UL) + (b & 0x3333333333333333UL);
-                    b *= 0x1111111111111111UL;
-                    attackUnits += KnightCheckBonus * ((int)(b >> 60));
+                    attackUnits += KnightCheckBonus * ((int)((b * 0x1111111111111111UL) >> 60));
                 }
 #else
                 // Initialize the 'attackUnits' variable, which is used later on as an

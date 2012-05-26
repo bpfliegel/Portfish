@@ -39,8 +39,7 @@ namespace Portfish
             b -= ((b >> 1) & 0x5555555555555555UL);
             b = ((b >> 2) & 0x3333333333333333UL) + (b & 0x3333333333333333UL);
             b = ((b >> 4) + b) & 0x0F0F0F0F0F0F0F0FUL;
-            b *= 0x0101010101010101UL;
-            return (int)(b >> 56);
+            return (int)((b * 0x0101010101010101UL) >> 56);
 #else
             UInt32 w = (UInt32)(b >> 32), v = (UInt32)(b);
             v -= (v >> 1) & 0x55555555; // 0-2 in 2 bits
@@ -62,8 +61,7 @@ namespace Portfish
 #if X64
             b -= (b >> 1) & 0x5555555555555555UL;
             b = ((b >> 2) & 0x3333333333333333UL) + (b & 0x3333333333333333UL);
-            b *= 0x1111111111111111UL;
-            return (int)(b >> 60);
+            return (int)((b * 0x1111111111111111UL) >> 60);
 #else
             UInt32 w = (UInt32)(b >> 32), v = (UInt32)(b);
             v -= (v >> 1) & 0x55555555; // 0-2 in 2 bits

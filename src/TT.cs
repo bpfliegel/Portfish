@@ -105,8 +105,6 @@ namespace Portfish
             sizeMask = size - 1;
 
             entries = new TTEntry[size * 4];
-
-            clear();
         }
 
         /// TranspositionTable::clear() overwrites the entire transposition table
