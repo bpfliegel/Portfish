@@ -508,8 +508,7 @@ namespace Portfish
                 key ^= PolyGlotRandoms[ZobPieceOffset + PieceOffset[pos.piece_on(s)] + s];
             }
 
-            b = (ulong)((pos.can_castle_CR_bit(CastleRightC.WHITE_OO) << 0) | (pos.can_castle_CR_bit(CastleRightC.WHITE_OOO) << 1)
-                | (pos.can_castle_CR_bit(CastleRightC.BLACK_OO) << 2) | (pos.can_castle_CR_bit(CastleRightC.BLACK_OOO) << 3));
+            b = (ulong)pos.can_castle_CR(CastleRightC.ALL_CASTLES);
 
             while (b != 0)
                 key ^= PolyGlotRandoms[ZobCastleOffset + Utils.pop_1st_bit(ref b)];

@@ -157,6 +157,13 @@ namespace Portfish
                 && Utils.file_of(psq) == FileC.FILE_A)
                 return ResultC.DRAW;
 
+            // Case 6: White king trapped on the rook file
+            if (Utils.file_of(wksq) == FileC.FILE_A
+                && Utils.file_of(psq) == FileC.FILE_A
+                && Utils.rank_of(wksq) > Utils.rank_of(psq)
+                && bksq == wksq + 2)
+                return ResultC.DRAW;
+
             return ResultC.UNKNOWN;
         }
 

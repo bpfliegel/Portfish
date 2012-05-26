@@ -316,7 +316,7 @@ namespace Portfish
 #endif
         internal int can_castle_C(Color c)
         {
-            return st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << c);
+            return st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << (2 * c));
         }
 
 #if AGGR_INLINE
@@ -848,7 +848,7 @@ namespace Portfish
                 if (Utils.isdigit(token))
                     sq += (token - '0'); // Advance the given number of files
                 else if (token == '/')
-                    sq = Utils.make_square(FileC.FILE_A, Utils.rank_of(sq) - 2);
+                    sq -= 16;
                 else
                 {
                     p = PieceToChar.IndexOf(token);

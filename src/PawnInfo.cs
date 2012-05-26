@@ -91,12 +91,12 @@ namespace Portfish
         {
             if (Us == ColorC.WHITE)
             {
-                return kingSquaresWHITE == ksq && castleRightsWHITE == (pos.st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << ColorC.WHITE))
+                return kingSquaresWHITE == ksq && castleRightsWHITE == (pos.st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << (ColorC.WHITE * 2)))
                     ? kingSafetyWHITE : update_safety_WHITE(pos, ksq);
             }
             else
             {
-                return kingSquaresBLACK == ksq && castleRightsBLACK == (pos.st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << ColorC.BLACK))
+                return kingSquaresBLACK == ksq && castleRightsBLACK == (pos.st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << (ColorC.BLACK * 2)))
                     ? kingSafetyBLACK : update_safety_BLACK(pos, ksq);
             }
         }
@@ -145,10 +145,10 @@ namespace Portfish
             Value bonus = shelter_storm(ColorC.WHITE, pos, ksq);
 
             // If we can castle use the bonus after the castle if is bigger
-            if ((pos.st.castleRights & CastleRightC.WHITE_OO) != 0)
+            if (pos.can_castle_CR(Utils.make_castle_right(ColorC.WHITE, CastlingSideC.KING_SIDE))!=0)
                 bonus = Math.Max(bonus, shelter_storm(ColorC.WHITE, pos, (SquareC.SQ_G1 ^ (ColorC.WHITE * 56))));
 
-            if ((pos.st.castleRights & CastleRightC.WHITE_OOO) != 0)
+            if (pos.can_castle_CR(Utils.make_castle_right(ColorC.WHITE, CastlingSideC.QUEEN_SIDE)) != 0)
                 bonus = Math.Max(bonus, shelter_storm(ColorC.WHITE, pos, (SquareC.SQ_C1 ^ (ColorC.WHITE * 56))));
 
             return kingSafetyWHITE = (bonus << 16);
@@ -165,10 +165,10 @@ namespace Portfish
             Value bonus = shelter_storm(ColorC.BLACK, pos, ksq);
 
             // If we can castle use the bonus after the castle if is bigger
-            if ((pos.st.castleRights & CastleRightC.BLACK_OO) != 0)
+            if (pos.can_castle_CR(Utils.make_castle_right(ColorC.BLACK, CastlingSideC.KING_SIDE)) != 0)
                 bonus = Math.Max(bonus, shelter_storm(ColorC.BLACK, pos, (SquareC.SQ_G1 ^ (ColorC.BLACK * 56))));
 
-            if ((pos.st.castleRights & CastleRightC.BLACK_OOO) != 0)
+            if (pos.can_castle_CR(Utils.make_castle_right(ColorC.BLACK, CastlingSideC.QUEEN_SIDE)) != 0)
                 bonus = Math.Max(bonus, shelter_storm(ColorC.BLACK, pos, (SquareC.SQ_C1 ^ (ColorC.BLACK * 56))));
 
             return kingSafetyBLACK = (bonus << 16);

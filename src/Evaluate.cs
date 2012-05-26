@@ -759,7 +759,7 @@ namespace Portfish
                                     // Is there a half-open file between the king and the edge of the board?
                                     if (((Us == ColorC.WHITE) ? (ei.pi.halfOpenFilesWHITE & ~((1 << ((ksq & 7) + 1)) - 1)) : (ei.pi.halfOpenFilesBLACK & ~((1 << ((ksq & 7) + 1)) - 1))) == 0)
                                     {
-                                        score -= ((((pos.st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << Us)) != 0) ? (TrappedRookPenalty - mob * 16) / 2 : (TrappedRookPenalty - mob * 16)) << 16);
+                                        score -= ((((pos.st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << (Us * 2))) != 0) ? (TrappedRookPenalty - mob * 16) / 2 : (TrappedRookPenalty - mob * 16)) << 16);
                                     }
                                 }
                             }
@@ -770,7 +770,7 @@ namespace Portfish
                                     // Is there a half-open file between the king and the edge of the board?
                                     if (((Us == ColorC.WHITE) ? (ei.pi.halfOpenFilesWHITE & ((1 << (ksq & 7)) - 1)) : (ei.pi.halfOpenFilesBLACK & ((1 << (ksq & 7)) - 1))) == 0)
                                     {
-                                        score -= ((((pos.st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << Us)) != 0) ? (TrappedRookPenalty - mob * 16) / 2 : (TrappedRookPenalty - mob * 16)) << 16);
+                                        score -= ((((pos.st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << (Us * 2))) != 0) ? (TrappedRookPenalty - mob * 16) / 2 : (TrappedRookPenalty - mob * 16)) << 16);
                                     }
                                 }
                             }

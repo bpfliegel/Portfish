@@ -114,12 +114,13 @@ namespace Portfish
 
     internal static class CastleRightC
     {
-        internal const int CASTLES_NONE = 0,
-        WHITE_OO = 1,
-        BLACK_OO = 2,
-        WHITE_OOO = 4,
-        BLACK_OOO = 8,
-        ALL_CASTLES = 15;
+        internal const int // Defined as in PolyGlot book hash key
+            CASTLES_NONE = 0,
+            WHITE_OO = 1,
+            WHITE_OOO = 2,
+            BLACK_OO = 4,
+            BLACK_OOO = 8,
+            ALL_CASTLES = 15;
     };
 
     internal static class CastlingSideC

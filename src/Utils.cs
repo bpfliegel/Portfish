@@ -116,25 +116,22 @@ namespace Portfish
             FileBB[FileC.FILE_A] = Constants.FileABB;
             RankBB[RankC.RANK_1] = Constants.Rank1BB;
 
-            for (int f = FileC.FILE_B; f <= FileC.FILE_H; f++)
+            for (int i = 1; i < 8; i++)
             {
-                FileBB[f] = FileBB[f - 1] << 1;
-                RankBB[f] = RankBB[f - 1] << 8;
+                FileBB[i] = FileBB[i - 1] << 1;
+                RankBB[i] = RankBB[i - 1] << 8;
             }
 
-            for (int f = FileC.FILE_A; f <= FileC.FILE_H; f++)
+            for (File f = FileC.FILE_A; f <= FileC.FILE_H; f++)
             {
-                AdjacentFilesBB[f] = ((f > FileC.FILE_A ? FileBB[f - 1] : 0) | (f < FileC.FILE_H ? FileBB[f + 1] : 0));
-                ThisAndAdjacentFilesBB[f] = (FileBB[f] | AdjacentFilesBB[f]);
+                AdjacentFilesBB[f] = (f > FileC.FILE_A ? FileBB[f - 1] : 0) | (f < FileC.FILE_H ? FileBB[f + 1] : 0);
+                ThisAndAdjacentFilesBB[f] = FileBB[f] | AdjacentFilesBB[f];
             }
 
             InFrontBB[ColorC.WHITE] = new Bitboard[8];
             InFrontBB[ColorC.BLACK] = new Bitboard[8];
-            for (int rw = RankC.RANK_7, rb = RankC.RANK_2; rw >= RankC.RANK_1; rw--, rb++)
-            {
-                InFrontBB[ColorC.WHITE][rw] = InFrontBB[ColorC.WHITE][rw + 1] | RankBB[rw + 1];
-                InFrontBB[ColorC.BLACK][rb] = InFrontBB[ColorC.BLACK][rb - 1] | RankBB[rb - 1];
-            }
+            for (Rank r = RankC.RANK_1; r < RankC.RANK_8; r++)
+                InFrontBB[ColorC.WHITE][r] = ~(InFrontBB[ColorC.BLACK][r + 1] = InFrontBB[ColorC.BLACK][r] | RankBB[r]);
 
             for (Color c = ColorC.WHITE; c <= ColorC.BLACK; c++)
             {
@@ -210,9 +207,8 @@ namespace Portfish
 
             for (Square s = SquareC.SQ_A1; s <= SquareC.SQ_H8; s++)
             {
-                PseudoAttacks[PieceTypeC.BISHOP][s] = bishop_attacks_bb(s, 0);
-                PseudoAttacks[PieceTypeC.ROOK][s] = rook_attacks_bb(s, 0);
-                PseudoAttacks[PieceTypeC.QUEEN][s] = PseudoAttacks[PieceTypeC.BISHOP][s] | PseudoAttacks[PieceTypeC.ROOK][s];
+                PseudoAttacks[PieceTypeC.QUEEN][s] = PseudoAttacks[PieceTypeC.BISHOP][s] = bishop_attacks_bb(s, 0);
+                PseudoAttacks[PieceTypeC.QUEEN][s] |= PseudoAttacks[PieceTypeC.ROOK][s] = rook_attacks_bb(s, 0);
 
                 PseudoAttacks_BISHOP[s] = PseudoAttacks[PieceTypeC.BISHOP][s];
                 PseudoAttacks_ROOK[s] = PseudoAttacks[PieceTypeC.ROOK][s];
@@ -1011,7 +1007,7 @@ namespace Portfish
 #endif
         internal static CastleRight make_castle_right(Color c, CastlingSide s)
         {
-            return ((s == CastlingSideC.KING_SIDE ? CastleRightC.WHITE_OO : CastleRightC.WHITE_OOO) << c);
+            return CastleRightC.WHITE_OO << ((s == CastlingSideC.QUEEN_SIDE ? 1 : 0) + 2 * c);
         }
 
         #endregion
