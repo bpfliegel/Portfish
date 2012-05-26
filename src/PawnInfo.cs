@@ -91,12 +91,12 @@ namespace Portfish
         {
             if (Us == ColorC.WHITE)
             {
-                return kingSquaresWHITE == ksq && castleRightsWHITE == (pos.st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << (ColorC.WHITE * 2)))
+                return kingSquaresWHITE == ksq && castleRightsWHITE == (pos.st.castleRights & (CastleRightC.WHITE_ANY))
                     ? kingSafetyWHITE : update_safety_WHITE(pos, ksq);
             }
             else
             {
-                return kingSquaresBLACK == ksq && castleRightsBLACK == (pos.st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << (ColorC.BLACK * 2)))
+                return kingSquaresBLACK == ksq && castleRightsBLACK == (pos.st.castleRights & (CastleRightC.WHITE_ANY << 2))
                     ? kingSafetyBLACK : update_safety_BLACK(pos, ksq);
             }
         }
@@ -137,7 +137,7 @@ namespace Portfish
         internal Score update_safety_WHITE(Position pos, Square ksq)
         {
             kingSquaresWHITE = ksq;
-            castleRightsWHITE = pos.st.castleRights & (CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO);
+            castleRightsWHITE = pos.st.castleRights & CastleRightC.WHITE_ANY;
 
             if (((ksq >> 3) ^ (ColorC.WHITE * 7)) > RankC.RANK_4)
                 return kingSafetyWHITE = ScoreC.SCORE_ZERO;
@@ -145,10 +145,10 @@ namespace Portfish
             Value bonus = shelter_storm(ColorC.WHITE, pos, ksq);
 
             // If we can castle use the bonus after the castle if is bigger
-            if (pos.can_castle_CR(Utils.make_castle_right(ColorC.WHITE, CastlingSideC.KING_SIDE))!=0)
+            if ((pos.st.castleRights & CastleRightC.WHITE_OO)!=0)
                 bonus = Math.Max(bonus, shelter_storm(ColorC.WHITE, pos, (SquareC.SQ_G1 ^ (ColorC.WHITE * 56))));
 
-            if (pos.can_castle_CR(Utils.make_castle_right(ColorC.WHITE, CastlingSideC.QUEEN_SIDE)) != 0)
+            if ((pos.st.castleRights & CastleRightC.WHITE_OOO) != 0)
                 bonus = Math.Max(bonus, shelter_storm(ColorC.WHITE, pos, (SquareC.SQ_C1 ^ (ColorC.WHITE * 56))));
 
             return kingSafetyWHITE = (bonus << 16);
@@ -157,7 +157,7 @@ namespace Portfish
         internal Score update_safety_BLACK(Position pos, Square ksq)
         {
             kingSquaresBLACK = ksq;
-            castleRightsBLACK = pos.st.castleRights & (CastleRightC.BLACK_OO | CastleRightC.BLACK_OOO);
+            castleRightsBLACK = pos.st.castleRights & CastleRightC.BLACK_ANY;
 
             if (((ksq >> 3) ^ (ColorC.BLACK * 7)) > RankC.RANK_4)
                 return kingSafetyBLACK = ScoreC.SCORE_ZERO;
@@ -165,10 +165,10 @@ namespace Portfish
             Value bonus = shelter_storm(ColorC.BLACK, pos, ksq);
 
             // If we can castle use the bonus after the castle if is bigger
-            if (pos.can_castle_CR(Utils.make_castle_right(ColorC.BLACK, CastlingSideC.KING_SIDE)) != 0)
+            if ((pos.st.castleRights & CastleRightC.BLACK_OO) != 0)
                 bonus = Math.Max(bonus, shelter_storm(ColorC.BLACK, pos, (SquareC.SQ_G1 ^ (ColorC.BLACK * 56))));
 
-            if (pos.can_castle_CR(Utils.make_castle_right(ColorC.BLACK, CastlingSideC.QUEEN_SIDE)) != 0)
+            if ((pos.st.castleRights & CastleRightC.BLACK_OOO) != 0)
                 bonus = Math.Max(bonus, shelter_storm(ColorC.BLACK, pos, (SquareC.SQ_C1 ^ (ColorC.BLACK * 56))));
 
             return kingSafetyBLACK = (bonus << 16);

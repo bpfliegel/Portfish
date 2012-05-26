@@ -1427,7 +1427,7 @@ namespace Portfish
                                  && inCheck
                                  && bestValue > ValueC.VALUE_MATED_IN_MAX_PLY
                                  && !(((pos.board[move & 0x3F] != PieceC.NO_PIECE) && !((move & (3 << 14)) == (3 << 14))) || ((move & (3 << 14)) == (2 << 14)))
-                                 && ((pos.st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << (2 * pos.sideToMove))) == 0);
+                                 && ((pos.st.castleRights & (CastleRightC.WHITE_ANY << (pos.sideToMove << 1))) == 0);
 
                 // Don't search moves with negative SEE values
                 if (!PvNode

@@ -118,8 +118,10 @@ namespace Portfish
             CASTLES_NONE = 0,
             WHITE_OO = 1,
             WHITE_OOO = 2,
+            WHITE_ANY = WHITE_OO | WHITE_OOO,
             BLACK_OO = 4,
             BLACK_OOO = 8,
+            BLACK_ANY = BLACK_OO | BLACK_OOO,
             ALL_CASTLES = 15;
     };
 

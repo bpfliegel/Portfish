@@ -316,7 +316,7 @@ namespace Portfish
 #endif
         internal int can_castle_C(Color c)
         {
-            return st.castleRights & ((CastleRightC.WHITE_OO | CastleRightC.WHITE_OOO) << (2 * c));
+            return st.castleRights & (CastleRightC.WHITE_ANY << (c << 1));
         }
 
 #if AGGR_INLINE
