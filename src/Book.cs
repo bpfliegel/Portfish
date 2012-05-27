@@ -412,7 +412,7 @@ namespace Portfish
                         // Choose book move according to its score. If a move has a very
                         // high score it has higher probability to be choosen than a move
                         // with lower score. Note that first entry is always chosen.
-                        if ((RKiss.rand() % sum < e.count)
+                        if (((sum!=0) && (RKiss.rand() % sum < e.count))
                             || (pickBest && e.count == best))
                         {
                             move = e.move;
