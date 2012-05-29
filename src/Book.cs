@@ -315,12 +315,6 @@ namespace Portfish
 
         private const long SIZE_OF_BOOKENTRY = 16;
 
-        // PieceOffset is calculated as 64 * (PolyPiece ^ 1) where PolyPiece
-        // is: BP = 0, WP = 1, BN = 2, WN = 3 ... BK = 10, WK = 11
-        private static readonly int[] PieceOffset = new int[] { 
-            0, 64, 192, 320, 448, 576, 704, 0,
-            0,  0, 128, 256, 384, 512, 640 };
-
         private static readonly RKISS RKiss = new RKISS();
 
 #if PORTABLE
@@ -504,8 +498,12 @@ namespace Portfish
 
             while (b != 0)
             {
+                // Piece offset is at 64 * polyPiece where polyPiece is defined as:
+                // BP = 0, WP = 1, BN = 2, WN = 3, ... BK = 10, WK = 11
                 Square s = Utils.pop_1st_bit(ref b);
-                key ^= PolyGlotRandoms[ZobPieceOffset + PieceOffset[pos.piece_on(s)] + s];
+                Piece p = pos.piece_on(s);
+                int polyPiece = 2 * (Utils.type_of(p) - 1) + (Utils.color_of(p) == ColorC.WHITE ? 1 : 0);
+                key ^= PolyGlotRandoms[ZobPieceOffset + (64 * polyPiece + s)];
             }
 
             b = (ulong)pos.can_castle_CR(CastleRightC.ALL_CASTLES);

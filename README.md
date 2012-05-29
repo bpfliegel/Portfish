@@ -8,7 +8,7 @@ Latest versions could be downloaded from: https://github.com/downloads/bpfliegel
 0. Introduction
 ---------------
 
-Portfish is the .Net port of Stockfish, functionally equal to Stockfish 2012 may 26, commit 6c9c6dd989.
+Portfish is the .Net port of Stockfish, functionally equal to Stockfish 2012 may 27, commit 0412f4a1ee.
 All features of the original version are present, except search and debug logging is stripped.
 The fastest builds are 4.0 x64 and 4.5 beta x64.
 
