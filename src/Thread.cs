@@ -322,10 +322,7 @@ namespace Portfish
                     Position pos = PositionBroker.GetObject();
                     pos.copy(sp.pos, this);
 
-                    for (int i = 0; i < 4; i++)
-                    {
-                        ss[ssPos + i].memcpy(sp.ss[sp.ssPos + i - 1]);
-                    }
+                    Array.Copy(sp.ss, sp.ssPos - 1, ss, ssPos, 4);
                     ss[ssPos + 1].sp = sp;
 
                     ThreadHelper.lock_grab(sp.Lock);

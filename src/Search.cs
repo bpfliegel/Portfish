@@ -41,20 +41,6 @@ namespace Portfish
         internal Value eval;
         internal Value evalMargin;
         internal int skipNullMove;
-
-        internal void memcpy(Stack other)
-        {
-            this.sp = other.sp;
-            this.ply = other.ply;
-            this.currentMove = other.currentMove;
-            this.excludedMove = other.excludedMove;
-            this.killers0 = other.killers0;
-            this.killers1 = other.killers1;
-            this.reduction = other.reduction;
-            this.eval = other.eval;
-            this.evalMargin = other.evalMargin;
-            this.skipNullMove = other.skipNullMove;
-        }
     };
 
     /// The LimitsType struct stores information sent by GUI about available time
