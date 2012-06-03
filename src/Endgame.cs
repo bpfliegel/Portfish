@@ -27,8 +27,41 @@ namespace Portfish
     internal delegate Value EndgameValue(Color c, Position pos);
     internal delegate ScaleFactor EndgameScaleFactor(Color c, Position pos);
 
-    internal static class Endgames
+    internal static class Endgame
     {
+        // Penalties
+        private static readonly int[] penalty = new int[] { 0, 10, 14, 20, 30, 42, 58, 80 };
+
+        // Table used to drive the defending king towards the edge of the board
+        // in KX vs K and KQ vs KR endgames.
+        private static readonly int[] MateTable = new int[64] {
+            100, 90, 80, 70, 70, 80, 90, 100,
+             90, 70, 60, 50, 50, 60, 70,  90,
+             80, 60, 40, 30, 30, 40, 60,  80,
+             70, 50, 30, 20, 20, 30, 50,  70,
+             70, 50, 30, 20, 20, 30, 50,  70,
+             80, 60, 40, 30, 30, 40, 60,  80,
+             90, 70, 60, 50, 50, 60, 70,  90,
+            100, 90, 80, 70, 70, 80, 90, 100,
+          };
+
+        // Table used to drive the defending king towards a corner square of the
+        // right color in KBN vs K endgames.
+        private static readonly int[] KBNKMateTable = new int[64] {
+            200, 190, 180, 170, 160, 150, 140, 130,
+            190, 180, 170, 160, 150, 140, 130, 140,
+            180, 170, 155, 140, 140, 125, 140, 150,
+            170, 160, 140, 120, 110, 140, 150, 160,
+            160, 150, 140, 110, 120, 140, 160, 170,
+            150, 140, 125, 140, 140, 155, 170, 180,
+            140, 130, 140, 150, 160, 170, 180, 190,
+            130, 140, 150, 160, 170, 180, 190, 200
+          };
+
+        // The attacking side is given a descending bonus based on distance between
+        // the two kings in basic endgames.
+        private static readonly int[] DistanceBonus = new int[8] { 0, 0, 100, 80, 60, 40, 20, 10 };
+
         // Imperfect hash, masksize=4, offset=52, offsetmask = 139611588448485376
         private static UInt32 ValueIndex = 0;
         private const UInt32 ValueCount = 32;
@@ -128,7 +161,7 @@ namespace Portfish
             ScaleFactorIndex++;
         }
 
-        internal static void InitEndgames()
+        internal static void init()
         {
             AddValue("KPK", Endgame.Endgame_KPK);
             AddValue("KNNK", Endgame.Endgame_KNNK);
@@ -146,44 +179,6 @@ namespace Portfish
             AddScaleFactor("KBPPKB", Endgame.Endgame_KBPPKB);
             AddScaleFactor("KRPPKRP", Endgame.Endgame_KRPPKRP);
         }
-    }
-
-    internal static class Endgame
-    {
-        // Penalties
-        private static readonly int[] penalty = new int[] { 0, 10, 14, 20, 30, 42, 58, 80 };
-
-        // Table used to drive the defending king towards the edge of the board
-        // in KX vs K and KQ vs KR endgames.
-        private static readonly int[] MateTable = new int[64] {
-            100, 90, 80, 70, 70, 80, 90, 100,
-             90, 70, 60, 50, 50, 60, 70,  90,
-             80, 60, 40, 30, 30, 40, 60,  80,
-             70, 50, 30, 20, 20, 30, 50,  70,
-             70, 50, 30, 20, 20, 30, 50,  70,
-             80, 60, 40, 30, 30, 40, 60,  80,
-             90, 70, 60, 50, 50, 60, 70,  90,
-            100, 90, 80, 70, 70, 80, 90, 100,
-          };
-
-        // Table used to drive the defending king towards a corner square of the
-        // right color in KBN vs K endgames.
-        private static readonly int[] KBNKMateTable = new int[64] {
-            200, 190, 180, 170, 160, 150, 140, 130,
-            190, 180, 170, 160, 150, 140, 130, 140,
-            180, 170, 155, 140, 140, 125, 140, 150,
-            170, 160, 140, 120, 110, 140, 150, 160,
-            160, 150, 140, 110, 120, 140, 160, 170,
-            150, 140, 125, 140, 140, 155, 170, 180,
-            140, 130, 140, 150, 160, 170, 180, 190,
-            130, 140, 150, 160, 170, 180, 190, 200
-          };
-
-        // The attacking side is given a descending bonus based on distance between
-        // the two kings in basic endgames.
-        private static readonly int[] DistanceBonus = new int[8] { 0, 0, 100, 80, 60, 40, 20, 10 };
-
-        //private Color strongerSide, weakerSide;
 
         /// Mate with KX vs K. This function is used to evaluate positions with
         /// King and plenty of material vs a lone king. It simply gives the

@@ -28,7 +28,7 @@ namespace Portfish
             Utils.InitLookups();
             Position.init();
             KPKPosition.kpk_bitbase_init();
-            Endgames.InitEndgames();
+            Endgame.init();
             Search.init();
             Evaluate.init();
 

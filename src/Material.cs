@@ -253,7 +253,7 @@ namespace Portfish
             // Let's look if we have a specialized evaluation function for this
             // particular material configuration. First we look for a fixed
             // configuration one, then a generic one if previous search failed.
-            if ((e.evaluationFunction = Endgames.probeValue(key, out e.evaluationFunctionColor)) != null)
+            if ((e.evaluationFunction = Endgame.probeValue(key, out e.evaluationFunctionColor)) != null)
                 return;
 
             if (is_KXK(ColorC.WHITE, pos))
@@ -293,7 +293,7 @@ namespace Portfish
             // scaling functions and we need to decide which one to use.
             EndgameScaleFactor sf;
             Color c;
-            if ((sf = Endgames.probeScaleFactor(key, out c)) != null)
+            if ((sf = Endgame.probeScaleFactor(key, out c)) != null)
             {
                 if (c == ColorC.WHITE)
                 {
