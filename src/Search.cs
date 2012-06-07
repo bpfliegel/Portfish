@@ -324,7 +324,7 @@ namespace Portfish
             Movegen.generate(MoveType.MV_LEGAL, pos, mlist.moves, ref mlist.pos);
 
             // At the last ply just return the number of moves (leaf nodes)
-            if (depth < DepthC.ONE_PLY)
+            if (depth == DepthC.ONE_PLY)
             {
                 int retval = mlist.pos;
                 MListBroker.Free(mlist);
@@ -333,7 +333,7 @@ namespace Portfish
 
             CheckInfo ci = CheckInfoBroker.GetObject();
             ci.CreateCheckInfo(pos);
-            for (int i = 0; i < mlist.pos; i++)
+            for (int i = 0; i < mlist.pos; ++i)
             {
                 MoveStack ms = mlist.moves[i];
                 pos.do_move(ms.move, st, ci, pos.move_gives_check(ms.move, ci));
