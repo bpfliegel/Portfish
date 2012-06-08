@@ -1093,7 +1093,7 @@ namespace Portfish
         {
             string strLowerPromotion = (str.Length == 5 ? str.Substring(0, 4) + str.Substring(4).ToLowerInvariant() : str);
             MList mlist = MListBroker.GetObject();
-            Movegen.generate(MoveType.MV_LEGAL, pos, mlist.moves, ref mlist.pos);
+            Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
             for (int i = 0; i < mlist.pos; i++)
             {
                 if (strLowerPromotion == Utils.move_to_uci(mlist.moves[i].move, pos.chess960))
@@ -1194,7 +1194,7 @@ namespace Portfish
                 StateInfo st = new StateInfo();
                 pos.do_move(m, st);
                 MList mlist = MListBroker.GetObject();
-                Movegen.generate(MoveType.MV_LEGAL, pos, mlist.moves, ref mlist.pos);
+                Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
                 san.Append(mlist.pos > 0 ? "+" : "#");
                 MListBroker.Free(mlist);
                 pos.undo_move(m);

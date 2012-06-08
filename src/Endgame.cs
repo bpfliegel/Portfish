@@ -194,7 +194,7 @@ namespace Portfish
 
             // Stalemate detection with lone king
             MList mlist = MListBroker.GetObject();
-            Movegen.generate(MoveType.MV_LEGAL, pos, mlist.moves, ref mlist.pos);
+            Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
             bool any = mlist.pos > 0;
             MListBroker.Free(mlist);
 

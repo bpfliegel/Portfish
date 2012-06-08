@@ -1151,7 +1151,7 @@ namespace Portfish
         internal bool move_is_legal(Move m)
         {
             MList mlist = MListBroker.GetObject();
-            Movegen.generate(MoveType.MV_LEGAL, this, mlist.moves, ref mlist.pos);
+            Movegen.generate_legal(this, mlist.moves, ref mlist.pos);
             for (int i = 0; i < mlist.pos; i++)
             {
                 if (mlist.moves[i].move == m)
@@ -2104,7 +2104,7 @@ namespace Portfish
                 if (st.checkersBB == 0) return true;
                 MList mlist = MListBroker.GetObject();
                 Position pos2 = this;
-                Movegen.generate(MoveType.MV_LEGAL, pos2, mlist.moves, ref mlist.pos);
+                Movegen.generate_legal(pos2, mlist.moves, ref mlist.pos);
                 bool any = mlist.pos > 0;
                 MListBroker.Free(mlist);
                 if (any)

@@ -302,179 +302,182 @@ namespace Portfish
             }
         }
 
-        /// generate<MV_CAPTURE> generates all pseudo-legal captures and queen
-        /// promotions. Returns a pointer to the end of the move list.
-        ///
-        /// generate<MV_QUIET> generates all pseudo-legal non-captures and
-        /// underpromotions. Returns a pointer to the end of the move list.
-        ///
-        /// generate<MV_NON_EVASION> generates all pseudo-legal captures and
-        /// non-captures. Returns a pointer to the end of the move list.
-
-        internal static void generate(MoveType Type, Position pos, MoveStack[] ms, ref int mpos)
+        internal static void generate_legal(Position pos, MoveStack[] ms, ref int mpos)
         {
-            Color us;
-            Bitboard target;
+            /// generate<MV_LEGAL> generates all the legal moves in the given position
+            Bitboard pinned = pos.pinned_pieces();
 
-            if (MoveType.MV_LEGAL == Type)
+            if (pos.in_check()) { generate_evasion(pos, ms, ref mpos); }
+            else { generate_non_evasion(pos, ms, ref mpos); }
+
+            int last = mpos;
+            int cur = 0;
+            while (cur != last)
             {
-                /// generate<MV_LEGAL> generates all the legal moves in the given position
-                Bitboard pinned = pos.pinned_pieces();
-
-                if (pos.in_check()) { generate(MoveType.MV_EVASION, pos, ms, ref mpos); }
-                else { generate(MoveType.MV_NON_EVASION, pos, ms, ref mpos); }
-
-                int last = mpos;
-                int cur = 0;
-                while (cur != last)
+                if (!pos.pl_move_is_legal(ms[cur].move, pinned))
                 {
-                    if (!pos.pl_move_is_legal(ms[cur].move, pinned))
-                    {
-                        ms[cur].move = ms[--last].move;
-                    }
-                    else
-                    {
-                        cur++;
-                    }
+                    ms[cur].move = ms[--last].move;
                 }
-                mpos = last;
-
-                return;
+                else
+                {
+                    cur++;
+                }
             }
+            mpos = last;
+        }
 
-            if (MoveType.MV_EVASION == Type)
+        internal static void generate_evasion(Position pos, MoveStack[] ms, ref int mpos)
+        {
+            /// generate<MV_EVASION> generates all pseudo-legal check evasions when the side
+            /// to move is in check. Returns a pointer to the end of the move list.
+            Debug.Assert(pos.in_check());
+
+            Bitboard b;
+            Square from, checksq;
+            int checkersCnt = 0;
+            Color us = pos.sideToMove;
+            Square ksq = pos.king_square(us);
+            Bitboard sliderAttacks = 0;
+            Bitboard checkers = pos.st.checkersBB;
+
+            Debug.Assert(checkers != 0);
+
+            // Find squares attacked by slider checkers, we will remove them from the king
+            // evasions so to skip known illegal moves avoiding useless legality check later.
+            b = checkers;
+            do
             {
-                /// generate<MV_EVASION> generates all pseudo-legal check evasions when the side
-                /// to move is in check. Returns a pointer to the end of the move list.
-                Debug.Assert(pos.in_check());
+                checkersCnt++;
+                checksq = Utils.pop_1st_bit(ref b);
 
-                Bitboard b;
-                Square from, checksq;
-                int checkersCnt = 0;
-                us = pos.sideToMove;
-                Square ksq = pos.king_square(us);
-                Bitboard sliderAttacks = 0;
-                Bitboard checkers = pos.st.checkersBB;
+                Debug.Assert(Utils.color_of(pos.piece_on(checksq)) == Utils.flip_C(us));
 
-                Debug.Assert(checkers != 0);
-
-                // Find squares attacked by slider checkers, we will remove them from the king
-                // evasions so to skip known illegal moves avoiding useless legality check later.
-                b = checkers;
-                do
+                switch (Utils.type_of(pos.piece_on(checksq)))
                 {
-                    checkersCnt++;
-                    checksq = Utils.pop_1st_bit(ref b);
+                    case PieceTypeC.BISHOP: sliderAttacks |= Utils.PseudoAttacks[PieceTypeC.BISHOP][checksq]; break;
+                    case PieceTypeC.ROOK: sliderAttacks |= Utils.PseudoAttacks[PieceTypeC.ROOK][checksq]; break;
+                    case PieceTypeC.QUEEN:
+                        // If queen and king are far or not on a diagonal line we can safely
+                        // remove all the squares attacked in the other direction becuase are
+                        // not reachable by the king anyway.
+                        if ((Utils.between_bb(ksq, checksq) != 0) || ((Utils.bit_is_set(Utils.PseudoAttacks[PieceTypeC.BISHOP][checksq], ksq)) == 0))
+                            sliderAttacks |= Utils.PseudoAttacks[PieceTypeC.QUEEN][checksq];
 
-                    Debug.Assert(Utils.color_of(pos.piece_on(checksq)) == Utils.flip_C(us));
-
-                    switch (Utils.type_of(pos.piece_on(checksq)))
-                    {
-                        case PieceTypeC.BISHOP: sliderAttacks |= Utils.PseudoAttacks[PieceTypeC.BISHOP][checksq]; break;
-                        case PieceTypeC.ROOK: sliderAttacks |= Utils.PseudoAttacks[PieceTypeC.ROOK][checksq]; break;
-                        case PieceTypeC.QUEEN:
-                            // If queen and king are far or not on a diagonal line we can safely
-                            // remove all the squares attacked in the other direction becuase are
-                            // not reachable by the king anyway.
-                            if ((Utils.between_bb(ksq, checksq) != 0) || ((Utils.bit_is_set(Utils.PseudoAttacks[PieceTypeC.BISHOP][checksq], ksq)) == 0))
-                                sliderAttacks |= Utils.PseudoAttacks[PieceTypeC.QUEEN][checksq];
-
-                            // Otherwise we need to use real rook attacks to check if king is safe
-                            // to move in the other direction. For example: king in B2, queen in A1
-                            // a knight in B1, and we can safely move to C1.
-                            else
-                                sliderAttacks |= Utils.PseudoAttacks[PieceTypeC.BISHOP][checksq] | pos.attacks_from_ROOK(checksq);
-                            break;
-                        default:
-                            break;
-                    }
-                } while (b != 0);
-
-                // Generate evasions for king, capture and non capture moves
-                b = pos.attacks_from_KING(ksq) & ~pos.pieces_C(us) & ~sliderAttacks;
-                from = ksq;
-                while (b != 0) { ms[mpos++].move = Utils.make_move(from, Utils.pop_1st_bit(ref b)); }
-
-                // Generate evasions for other pieces only if not under a double check
-                if (checkersCnt > 1)
-                    return;
-
-                // Blocking evasions or captures of the checking piece
-                target = Utils.between_bb(checksq, ksq) | checkers;
-                generate_pawn_moves(us, MoveType.MV_EVASION, pos, ms, ref mpos, target, SquareC.SQ_NONE);
-                generate_moves(pos, ms, ref mpos, us, target);
-
-                return;
-            }
-
-            if (MoveType.MV_QUIET_CHECK == Type)
-            {
-                /// generate<MV_NON_CAPTURE_CHECK> generates all pseudo-legal non-captures and knight
-                /// underpromotions that give check. Returns a pointer to the end of the move list.
-                Debug.Assert(!pos.in_check());
-
-                us = pos.sideToMove;
-                CheckInfo ci = CheckInfoBroker.GetObject();
-                ci.CreateCheckInfo(pos);
-                Bitboard dc = ci.dcCandidates;
-
-                while (dc != 0)
-                {
-                    Square from = Utils.pop_1st_bit(ref dc);
-                    PieceType pt = Utils.type_of(pos.piece_on(from));
-
-                    if (pt == PieceTypeC.PAWN)
-                        continue; // Will be generated together with direct checks
-
-                    Bitboard b = pos.attacks_from_PTS(pt, from) & ~pos.occupied_squares;
-
-                    if (pt == PieceTypeC.KING)
-                        b &= ~Utils.PseudoAttacks[PieceTypeC.QUEEN][ci.ksq];
-
-                    while (b != 0) { ms[mpos++].move = Utils.make_move(from, Utils.pop_1st_bit(ref b)); }
+                        // Otherwise we need to use real rook attacks to check if king is safe
+                        // to move in the other direction. For example: king in B2, queen in A1
+                        // a knight in B1, and we can safely move to C1.
+                        else
+                            sliderAttacks |= Utils.PseudoAttacks[PieceTypeC.BISHOP][checksq] | pos.attacks_from_ROOK(checksq);
+                        break;
+                    default:
+                        break;
                 }
+            } while (b != 0);
 
-                generate_pawn_moves(us, MoveType.MV_QUIET_CHECK, pos, ms, ref mpos, ci.dcCandidates, ci.ksq);
+            // Generate evasions for king, capture and non capture moves
+            b = pos.attacks_from_KING(ksq) & ~pos.pieces_C(us) & ~sliderAttacks;
+            from = ksq;
+            while (b != 0) { ms[mpos++].move = Utils.make_move(from, Utils.pop_1st_bit(ref b)); }
 
-                generate_direct_checks(PieceTypeC.KNIGHT, pos, ms, ref mpos, us, ci);
-                generate_direct_checks(PieceTypeC.BISHOP, pos, ms, ref mpos, us, ci);
-                generate_direct_checks(PieceTypeC.ROOK, pos, ms, ref mpos, us, ci);
-                generate_direct_checks(PieceTypeC.QUEEN, pos, ms, ref mpos, us, ci);
-
-                CheckInfoBroker.Free(ci);
-
-                if (pos.can_castle_C(us)!=0)
-                {
-                    generate_castle(CastlingSideC.KING_SIDE, true, pos, ms, ref mpos, us);
-                    generate_castle(CastlingSideC.QUEEN_SIDE, true, pos, ms, ref mpos, us);
-                }
-
+            // Generate evasions for other pieces only if not under a double check
+            if (checkersCnt > 1)
                 return;
-            }
 
-            // All other cases
-            Debug.Assert(Type == MoveType.MV_CAPTURE || Type == MoveType.MV_QUIET || Type == MoveType.MV_NON_EVASION);
+            // Blocking evasions or captures of the checking piece
+            Bitboard target = Utils.between_bb(checksq, ksq) | checkers;
+            generate_pawn_moves(us, MoveType.MV_EVASION, pos, ms, ref mpos, target, SquareC.SQ_NONE);
+            generate_moves(pos, ms, ref mpos, us, target);
+        }
+
+        internal static void generate_quiet_check(Position pos, MoveStack[] ms, ref int mpos)
+        {
+            /// generate<MV_NON_CAPTURE_CHECK> generates all pseudo-legal non-captures and knight
+            /// underpromotions that give check. Returns a pointer to the end of the move list.
             Debug.Assert(!pos.in_check());
 
-            us = pos.sideToMove;
-            target = 0;
+            Color us = pos.sideToMove;
+            CheckInfo ci = CheckInfoBroker.GetObject();
+            ci.CreateCheckInfo(pos);
+            Bitboard dc = ci.dcCandidates;
 
-            if (Type == MoveType.MV_CAPTURE)
-                target = pos.pieces_C(Utils.flip_C(us));
-            else if (Type == MoveType.MV_QUIET)
-                target = ~pos.occupied_squares;
-            else if (Type == MoveType.MV_NON_EVASION)
-                target = ~pos.pieces_C(us);
+            while (dc != 0)
+            {
+                Square from = Utils.pop_1st_bit(ref dc);
+                PieceType pt = Utils.type_of(pos.piece_on(from));
 
-            generate_pawn_moves(us, Type, pos, ms, ref mpos, target, SquareC.SQ_NONE);
+                if (pt == PieceTypeC.PAWN)
+                    continue; // Will be generated together with direct checks
+
+                Bitboard b = pos.attacks_from_PTS(pt, from) & ~pos.occupied_squares;
+
+                if (pt == PieceTypeC.KING)
+                    b &= ~Utils.PseudoAttacks[PieceTypeC.QUEEN][ci.ksq];
+
+                while (b != 0) { ms[mpos++].move = Utils.make_move(from, Utils.pop_1st_bit(ref b)); }
+            }
+
+            generate_pawn_moves(us, MoveType.MV_QUIET_CHECK, pos, ms, ref mpos, ci.dcCandidates, ci.ksq);
+
+            generate_direct_checks(PieceTypeC.KNIGHT, pos, ms, ref mpos, us, ci);
+            generate_direct_checks(PieceTypeC.BISHOP, pos, ms, ref mpos, us, ci);
+            generate_direct_checks(PieceTypeC.ROOK, pos, ms, ref mpos, us, ci);
+            generate_direct_checks(PieceTypeC.QUEEN, pos, ms, ref mpos, us, ci);
+
+            if (pos.can_castle_C(us) != 0)
+            {
+                generate_castle(CastlingSideC.KING_SIDE, true, pos, ms, ref mpos, us);
+                generate_castle(CastlingSideC.QUEEN_SIDE, true, pos, ms, ref mpos, us);
+            }
+
+            CheckInfoBroker.Free(ci);
+        }
+
+        internal static void generate_quiet(Position pos, MoveStack[] ms, ref int mpos)
+        {
+            Debug.Assert(!pos.in_check());
+
+            Color us = pos.sideToMove;
+            Bitboard target = ~pos.occupied_squares;
+
+            generate_pawn_moves(us, MoveType.MV_QUIET, pos, ms, ref mpos, target, SquareC.SQ_NONE);
             generate_moves(pos, ms, ref mpos, us, target);
             generate_king_moves(pos, ms, ref mpos, us, target);
 
-            if (Type != MoveType.MV_CAPTURE && (pos.can_castle_C(us)!=0))
+            if ((pos.st.castleRights & (CastleRightC.WHITE_ANY << (us << 1))) != 0)
             {
                 generate_castle(CastlingSideC.KING_SIDE, false, pos, ms, ref mpos, us);
                 generate_castle(CastlingSideC.QUEEN_SIDE, false, pos, ms, ref mpos, us);
             }
+        }
+
+        internal static void generate_non_evasion(Position pos, MoveStack[] ms, ref int mpos)
+        {
+            Debug.Assert(!pos.in_check());
+
+            Color us = pos.sideToMove;
+            Bitboard target = ~(pos.byColorBB[us]);
+
+            generate_pawn_moves(us, MoveType.MV_NON_EVASION, pos, ms, ref mpos, target, SquareC.SQ_NONE);
+            generate_moves(pos, ms, ref mpos, us, target);
+            generate_king_moves(pos, ms, ref mpos, us, target);
+
+            if ((pos.st.castleRights & (CastleRightC.WHITE_ANY << (us << 1))) != 0)
+            {
+                generate_castle(CastlingSideC.KING_SIDE, false, pos, ms, ref mpos, us);
+                generate_castle(CastlingSideC.QUEEN_SIDE, false, pos, ms, ref mpos, us);
+            }
+        }
+
+        internal static void generate_capture(Position pos, MoveStack[] ms, ref int mpos)
+        {
+            Debug.Assert(!pos.in_check());
+
+            Color us = pos.sideToMove;
+            Bitboard target = pos.byColorBB[us ^ 1];
+
+            generate_pawn_moves(us, MoveType.MV_CAPTURE, pos, ms, ref mpos, target, SquareC.SQ_NONE);
+            generate_moves(pos, ms, ref mpos, us, target);
+            generate_king_moves(pos, ms, ref mpos, us, target);
         }
     }
 }

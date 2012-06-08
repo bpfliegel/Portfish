@@ -651,7 +651,7 @@ namespace Portfish
             Search.RootMoves.Clear();
 
             MList mlist = MListBroker.GetObject();
-            Movegen.generate(MoveType.MV_LEGAL, pos, mlist.moves, ref mlist.pos);
+            Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
             for (int i = 0; i < mlist.pos; i++)
             {
                 Move move = mlist.moves[i].move;

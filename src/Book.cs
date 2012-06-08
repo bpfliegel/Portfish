@@ -441,7 +441,7 @@ namespace Portfish
 
                 // Add 'special move' flags and verify it is legal
                 MList mlist = MListBroker.GetObject();
-                Movegen.generate(MoveType.MV_LEGAL, pos, mlist.moves, ref mlist.pos);
+                Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
                 for (int i = 0; i < mlist.pos; i++)
                 {
                     if (move == (mlist.moves[i].move & 0x3FFF))

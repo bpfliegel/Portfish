@@ -341,7 +341,7 @@ namespace Portfish
                 case SequencerC.CAPTURES_S5:
                 case SequencerC.CAPTURES_S6:
                     mpos = 0;
-                    Movegen.generate(MoveType.MV_CAPTURE, pos, ms, ref mpos);
+                    Movegen.generate_capture(pos, ms, ref mpos);
                     lastMovePos = mpos;
                     score_captures();
                     return;
@@ -353,7 +353,7 @@ namespace Portfish
 
                 case SequencerC.QUIETS_1_S1:
                     mpos = 0;
-                    Movegen.generate(MoveType.MV_QUIET, pos, ms, ref mpos);
+                    Movegen.generate_quiet(pos, ms, ref mpos);
                     lastQuietPos = lastMovePos = mpos;
                     score_noncaptures();
                     lastMovePos = partition(curMovePos, lastMovePos);
@@ -377,14 +377,14 @@ namespace Portfish
 
                 case SequencerC.EVASIONS_S2:
                     mpos = 0;
-                    Movegen.generate(MoveType.MV_EVASION, pos, ms, ref mpos);
+                    Movegen.generate_evasion(pos, ms, ref mpos);
                     lastMovePos = mpos;
                     score_evasions();
                     return;
 
                 case SequencerC.QUIET_CHECKS_S3:
                     mpos = 0;
-                    Movegen.generate(MoveType.MV_QUIET_CHECK, pos, ms, ref mpos);
+                    Movegen.generate_quiet_check(pos, ms, ref mpos);
                     lastMovePos = mpos;
                     return;
 

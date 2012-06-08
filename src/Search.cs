@@ -321,7 +321,7 @@ namespace Portfish
             Int64 cnt = 0;
 
             MList mlist = MListBroker.GetObject();
-            Movegen.generate(MoveType.MV_LEGAL, pos, mlist.moves, ref mlist.pos);
+            Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
 
             // At the last ply just return the number of moves (leaf nodes)
             if (depth == DepthC.ONE_PLY)
