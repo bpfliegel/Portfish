@@ -37,6 +37,19 @@ namespace Portfish
 
     internal static class Movegen
     {
+#if AGGR_INLINE
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        private static Bitboard move_pawns(Square Delta, Bitboard p)
+        {
+            return Delta == SquareC.DELTA_N ? p << 8
+              : Delta == SquareC.DELTA_S ? p >> 8
+              : Delta == SquareC.DELTA_NE ? (p & ~Constants.FileHBB) << 9
+              : Delta == SquareC.DELTA_SE ? (p & ~Constants.FileHBB) >> 7
+              : Delta == SquareC.DELTA_NW ? (p & ~Constants.FileABB) << 7
+              : Delta == SquareC.DELTA_SW ? (p & ~Constants.FileABB) >> 9 : 0;
+        }
+
         private static void generate_castle(CastlingSide Side, bool OnlyChecks, Position pos, MoveStack[] ms, ref int mpos, Color us)
         {
             if (pos.castle_impeded(us, Side) || (pos.can_castle_CR(Utils.make_castle_right(us, Side))==0) )
@@ -64,28 +77,18 @@ namespace Portfish
                 && ((pos.attackers_to(kto, Utils.xor_bit(pos.occupied_squares, rfrom)) & enemies) != 0))
                 return;
 
-            ms[mpos++].move = Utils.make_castle(kfrom, rfrom);
+            Move m = Utils.make_castle(kfrom, rfrom);
 
-            CheckInfo ci = CheckInfoBroker.GetObject();
-            ci.CreateCheckInfo(pos);
-            if (OnlyChecks && !pos.move_gives_check(ms[mpos - 1].move, ci))
+            if (OnlyChecks)
             {
-                mpos--;
+                CheckInfo ci = CheckInfoBroker.GetObject();
+                ci.CreateCheckInfo(pos);
+                bool givesCheck = pos.move_gives_check(m, ci);
+                CheckInfoBroker.Free(ci);
+                if (!givesCheck) return;
             }
-            CheckInfoBroker.Free(ci);
-        }
 
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        private static Bitboard move_pawns(Square Delta, Bitboard p)
-        {
-            return Delta == SquareC.DELTA_N ? p << 8
-              : Delta == SquareC.DELTA_S ? p >> 8
-              : Delta == SquareC.DELTA_NE ? (p & ~Constants.FileHBB) << 9
-              : Delta == SquareC.DELTA_SE ? (p & ~Constants.FileHBB) >> 7
-              : Delta == SquareC.DELTA_NW ? (p & ~Constants.FileABB) << 7
-              : Delta == SquareC.DELTA_SW ? (p & ~Constants.FileABB) >> 9 : 0;
+            ms[mpos++].move = m;
         }
 
         private static void generate_promotions(MoveType Type, Square Delta, MoveStack[] ms, ref int mpos, Bitboard pawnsOn7, Bitboard target, Square ksq)
@@ -215,7 +218,7 @@ namespace Portfish
             }
         }
 
-        private static void generate_direct_checks(PieceType Pt, Position pos, MoveStack[] ms, ref int mpos, Color us, ref CheckInfo ci)
+        private static void generate_direct_checks(PieceType Pt, Position pos, MoveStack[] ms, ref int mpos, Color us, CheckInfo ci)
         {
             Debug.Assert(Pt != PieceTypeC.KING && Pt != PieceTypeC.PAWN);
 
@@ -433,10 +436,10 @@ namespace Portfish
 
                 generate_pawn_moves(us, MoveType.MV_QUIET_CHECK, pos, ms, ref mpos, ci.dcCandidates, ci.ksq);
 
-                generate_direct_checks(PieceTypeC.KNIGHT, pos, ms, ref mpos, us, ref ci);
-                generate_direct_checks(PieceTypeC.BISHOP, pos, ms, ref mpos, us, ref ci);
-                generate_direct_checks(PieceTypeC.ROOK, pos, ms, ref mpos, us, ref ci);
-                generate_direct_checks(PieceTypeC.QUEEN, pos, ms, ref mpos, us, ref ci);
+                generate_direct_checks(PieceTypeC.KNIGHT, pos, ms, ref mpos, us, ci);
+                generate_direct_checks(PieceTypeC.BISHOP, pos, ms, ref mpos, us, ci);
+                generate_direct_checks(PieceTypeC.ROOK, pos, ms, ref mpos, us, ci);
+                generate_direct_checks(PieceTypeC.QUEEN, pos, ms, ref mpos, us, ci);
 
                 CheckInfoBroker.Free(ci);
 
