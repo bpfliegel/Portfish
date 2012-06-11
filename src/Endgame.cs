@@ -193,10 +193,10 @@ namespace Portfish
             Debug.Assert(pos.piece_count(weakerSide, PieceTypeC.PAWN) == ValueC.VALUE_ZERO);
 
             // Stalemate detection with lone king
-            MList mlist = MListBroker.GetObject();
+            MList mlist = MListBroker.GetObject(); mlist.pos = 0;
             Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
             bool any = mlist.pos > 0;
-            MListBroker.Free(mlist);
+            MListBroker.Free();
 
             if (pos.sideToMove == weakerSide
                 && !pos.in_check()
@@ -442,7 +442,7 @@ namespace Portfish
             result += (Utils.square_distance(bksq, nsq) * 32);
 
             // Bonus for restricting the knight's mobility
-            result += ((8 - Bitcount.popcount_1s_Max15(pos.attacks_from_KNIGHT(nsq))) * 8);
+            result += ((8 - Bitcount.popcount_1s_Max15(Position.attacks_from_KNIGHT(nsq))) * 8);
 
             return strongerSide == pos.sideToMove ? result : -result;
         }
@@ -530,11 +530,11 @@ namespace Portfish
                 && Utils.relative_rank_CS(weakerSide, pos.king_square(strongerSide)) >= RankC.RANK_4
                 && ((pos.pieces_PTC(PieceTypeC.ROOK, weakerSide) & Utils.rank_bb_R(Utils.relative_rank_CR(weakerSide, RankC.RANK_3))) != 0)
                 && ((pos.pieces_PTC(PieceTypeC.PAWN, weakerSide) & Utils.rank_bb_R(Utils.relative_rank_CR(weakerSide, RankC.RANK_2))) != 0)
-                && ((pos.attacks_from_KING(kingSq) & pos.pieces_PTC(PieceTypeC.PAWN, weakerSide)) != 0)
+                && ((Position.attacks_from_KING(kingSq) & pos.pieces_PTC(PieceTypeC.PAWN, weakerSide)) != 0)
                 )
             {
                 Square rsq = pos.pieceList[weakerSide][PieceTypeC.ROOK][0];
-                if ((pos.attacks_from_PAWN(rsq, strongerSide) & pos.pieces_PTC(PieceTypeC.PAWN, weakerSide)) != 0)
+                if ((Position.attacks_from_PAWN(rsq, strongerSide) & pos.pieces_PTC(PieceTypeC.PAWN, weakerSide)) != 0)
                     return ScaleFactorC.SCALE_FACTOR_DRAW;
             }
             return ScaleFactorC.SCALE_FACTOR_NONE;

@@ -38,11 +38,6 @@ namespace Portfish
     {
         internal readonly MoveStack[] moves = new MoveStack[Constants.MAX_MOVES + 2]; // 2 additional for the killers at the end
         internal int pos = 0;
-
-        public void Recycle()
-        {
-            pos = 0;
-        }
     }
 
     internal sealed class LoopStack

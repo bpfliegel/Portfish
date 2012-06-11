@@ -44,13 +44,14 @@ namespace Portfish
             return value;
         }
 
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal Bitboard pawn_attacks(Color c)
-        {
-            return (c == ColorC.WHITE) ? pawnAttacksWHITE : pawnAttacksBLACK;
-        }
+        // ALL CALLS INLINED
+//#if AGGR_INLINE
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//#endif
+//        internal Bitboard pawn_attacks(Color c)
+//        {
+//            return (c == ColorC.WHITE) ? pawnAttacksWHITE : pawnAttacksBLACK;
+//        }
 
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -60,29 +61,32 @@ namespace Portfish
             return (c == ColorC.WHITE) ? passedPawnsWHITE : passedPawnsBLACK;
         }
 
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal int file_is_half_open(Color c, File f)
-        {
-            return (c == ColorC.WHITE) ? (halfOpenFilesWHITE & (1 << f)) : (halfOpenFilesBLACK & (1 << f));
-        }
+        // ALL CALLS INLINED
+//#if AGGR_INLINE
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//#endif
+//        internal int file_is_half_open(Color c, File f)
+//        {
+//            return (c == ColorC.WHITE) ? (halfOpenFilesWHITE & (1 << f)) : (halfOpenFilesBLACK & (1 << f));
+//        }
 
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal int has_open_file_to_left(Color c, File f)
-        {
-            return (c == ColorC.WHITE) ? (halfOpenFilesWHITE & ((1 << f) - 1)) : (halfOpenFilesBLACK & ((1 << f) - 1));
-        }
+        // ALL CALLS INLINED
+//#if AGGR_INLINE
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//#endif
+//        internal int has_open_file_to_left(Color c, File f)
+//        {
+//            return (c == ColorC.WHITE) ? (halfOpenFilesWHITE & ((1 << f) - 1)) : (halfOpenFilesBLACK & ((1 << f) - 1));
+//        }
 
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal int has_open_file_to_right(Color c, File f)
-        {
-            return (c == ColorC.WHITE) ? (halfOpenFilesWHITE & ~((1 << (f + 1)) - 1)) : (halfOpenFilesBLACK & ~((1 << (f + 1)) - 1));
-        }
+        // ALL CALLS INLINED
+//#if AGGR_INLINE
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//#endif
+//        internal int has_open_file_to_right(Color c, File f)
+//        {
+//            return (c == ColorC.WHITE) ? (halfOpenFilesWHITE & ~((1 << (f + 1)) - 1)) : (halfOpenFilesBLACK & ~((1 << (f + 1)) - 1));
+//        }
 
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -103,7 +107,7 @@ namespace Portfish
 
         /// PawnEntry::shelter_storm() calculates shelter and storm penalties for the file
         /// the king is on, as well as the two adjacent files.
-        internal Value shelter_storm(Color Us, Position pos, Square ksq)
+        internal static Value shelter_storm(Color Us, Position pos, Square ksq)
         {
             Color Them = (Us == ColorC.WHITE ? ColorC.BLACK : ColorC.WHITE);
 
@@ -274,7 +278,7 @@ namespace Portfish
         }
 
         /// PawnTable::evaluate_pawns() evaluates each pawn of the given color
-        internal Score evaluate_pawns(Color Us, Position pos, Bitboard ourPawns, Bitboard theirPawns, PawnEntry e)
+        internal static Score evaluate_pawns(Color Us, Position pos, Bitboard ourPawns, Bitboard theirPawns, PawnEntry e)
         {
             Color Them = (Us == ColorC.WHITE ? ColorC.BLACK : ColorC.WHITE);
 

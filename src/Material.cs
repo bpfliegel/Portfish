@@ -75,13 +75,14 @@ namespace Portfish
             return sf == ScaleFactorC.SCALE_FACTOR_NONE ? factorBLACK : sf;
         }
 
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal Value evaluate(Position pos)
-        {
-            return evaluationFunction(evaluationFunctionColor, pos);
-        }
+        // ALL CALLS INLINED
+//#if AGGR_INLINE
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//#endif
+//        internal Value evaluate(Position pos)
+//        {
+//            return evaluationFunction(evaluationFunctionColor, pos);
+//        }
 
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -107,13 +108,14 @@ namespace Portfish
             return gamePhase;
         }
 
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal bool specialized_eval_exists()
-        {
-            return evaluationFunction != null;
-        }
+        // ALL CALLS INLINED
+//#if AGGR_INLINE
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//#endif
+//        internal bool specialized_eval_exists()
+//        {
+//            return evaluationFunction != null;
+//        }
     };
 
     internal sealed class MaterialTable

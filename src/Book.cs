@@ -36,7 +36,7 @@ namespace Portfish
         internal UInt32 learn;
     };
 
-    internal sealed class Book
+    internal static class Book
     {
         #region PolyGlotRandoms
 
@@ -321,7 +321,7 @@ namespace Portfish
         private static bool bookNotExists = false;
 #endif
 
-        internal Book()
+        internal static void init()
         {
             for (long i = Math.Abs(DateTime.Now.Millisecond % 10000L); i > 0; i--)
             {
@@ -332,7 +332,7 @@ namespace Portfish
         /// Book::probe() tries to find a book move for the given position. If no move
         /// is found returns MOVE_NONE. If pickBest is true returns always the highest
         /// rated move, otherwise randomly chooses one, based on the move score.
-        internal Move probe(Position pos, string filename, bool pickBest)
+        internal static Move probe(Position pos, string filename, bool pickBest)
         {
 #if PORTABLE
 
@@ -440,24 +440,24 @@ namespace Portfish
                 }
 
                 // Add 'special move' flags and verify it is legal
-                MList mlist = MListBroker.GetObject();
+                MList mlist = MListBroker.GetObject(); mlist.pos = 0;
                 Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
                 for (int i = 0; i < mlist.pos; i++)
                 {
                     if (move == (mlist.moves[i].move & 0x3FFF))
                     {
                         Move retval = mlist.moves[i].move;
-                        MListBroker.Free(mlist);
+                        MListBroker.Free();
                         return retval;
                     }
                 }
-                MListBroker.Free(mlist);
+                MListBroker.Free();
             }
 
             return MoveC.MOVE_NONE;
         }
 
-        private bool Read(ref BookEntry e, BinaryReader br)
+        private static bool Read(ref BookEntry e, BinaryReader br)
         {
             if (br.BaseStream.Length == br.BaseStream.Position) return false;
 
@@ -523,7 +523,7 @@ namespace Portfish
         /// Book::binary_search() takes a book key as input, and does a binary search
         /// through the book file for the given key. File stream current position is set
         /// to the leftmost book entry with the same key as the input.
-        private void binary_search(UInt64 key, UInt64 size, BinaryReader br)
+        private static void binary_search(UInt64 key, UInt64 size, BinaryReader br)
         {
             UInt64 low, high, mid;
             BookEntry e = new BookEntry();

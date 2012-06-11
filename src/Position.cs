@@ -27,21 +27,22 @@ namespace Portfish
 {
     internal sealed class CheckInfo
     {
-        internal CheckInfo(Position pos)
-        {
-            Color them = Utils.flip_C(pos.sideToMove);
-            ksq = pos.king_square(them);
+        // ALL CALLS INLINED
+        //internal CheckInfo(Position pos)
+        //{
+        //    Color them = Utils.flip_C(pos.sideToMove);
+        //    ksq = pos.king_square(them);
 
-            pinned = pos.pinned_pieces();
-            dcCandidates = pos.discovered_check_candidates();
+        //    pinned = pos.pinned_pieces();
+        //    dcCandidates = pos.discovered_check_candidates();
 
-            checkSq[PieceTypeC.PAWN] = pos.attacks_from_PAWN(ksq, them);
-            checkSq[PieceTypeC.KNIGHT] = pos.attacks_from_KNIGHT(ksq);
-            checkSq[PieceTypeC.BISHOP] = pos.attacks_from_BISHOP(ksq);
-            checkSq[PieceTypeC.ROOK] = pos.attacks_from_ROOK(ksq);
-            checkSq[PieceTypeC.QUEEN] = checkSq[PieceTypeC.BISHOP] | checkSq[PieceTypeC.ROOK];
-            checkSq[PieceTypeC.KING] = 0;
-        }
+        //    checkSq[PieceTypeC.PAWN] = Position.attacks_from_PAWN(ksq, them);
+        //    checkSq[PieceTypeC.KNIGHT] = Position.attacks_from_KNIGHT(ksq);
+        //    checkSq[PieceTypeC.BISHOP] = pos.attacks_from_BISHOP(ksq);
+        //    checkSq[PieceTypeC.ROOK] = pos.attacks_from_ROOK(ksq);
+        //    checkSq[PieceTypeC.QUEEN] = checkSq[PieceTypeC.BISHOP] | checkSq[PieceTypeC.ROOK];
+        //    checkSq[PieceTypeC.KING] = 0;
+        //}
 
         public CheckInfo()
         {
@@ -111,23 +112,19 @@ namespace Portfish
             this.previous = null;
         }
 
-        internal static void CopyReducedStateInfo(StateInfo newSI, StateInfo oldSI)
-        {
-            newSI.pawnKey = oldSI.pawnKey;
-            newSI.materialKey = oldSI.materialKey;
-            newSI.npMaterialWHITE = oldSI.npMaterialWHITE;
-            newSI.npMaterialBLACK = oldSI.npMaterialBLACK;
-            newSI.castleRights = oldSI.castleRights;
-            newSI.rule50 = oldSI.rule50;
-            newSI.pliesFromNull = oldSI.pliesFromNull;
-            newSI.psqScore = oldSI.psqScore;
-            newSI.epSquare = oldSI.epSquare;
-        }
-
-        public void Recycle()
-        {
-            this.previous = null;
-        }
+        // ALL CALLS INLINED
+        //internal static void CopyReducedStateInfo(StateInfo newSI, StateInfo oldSI)
+        //{
+        //    newSI.pawnKey = oldSI.pawnKey;
+        //    newSI.materialKey = oldSI.materialKey;
+        //    newSI.npMaterialWHITE = oldSI.npMaterialWHITE;
+        //    newSI.npMaterialBLACK = oldSI.npMaterialBLACK;
+        //    newSI.castleRights = oldSI.castleRights;
+        //    newSI.rule50 = oldSI.rule50;
+        //    newSI.pliesFromNull = oldSI.pliesFromNull;
+        //    newSI.psqScore = oldSI.psqScore;
+        //    newSI.epSquare = oldSI.epSquare;
+        //}
     };
 
     /// The position data structure. A position consists of the following data:
@@ -263,13 +260,14 @@ namespace Portfish
             return byTypeBB[pt] & byColorBB[c];
         }
 
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal Bitboard pieces_PTPT(PieceType pt1, PieceType pt2)
-        {
-            return byTypeBB[pt1] | byTypeBB[pt2];
-        }
+        // ALL CALLS INLINED
+//#if AGGR_INLINE
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//#endif
+//        internal Bitboard pieces_PTPT(PieceType pt1, PieceType pt2)
+//        {
+//            return byTypeBB[pt1] | byTypeBB[pt2];
+//        }
 
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -303,13 +301,14 @@ namespace Portfish
             return st.castleRights & f;
         }
 
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal int can_castle_CR_bit(CastleRight f)
-        {
-            return (st.castleRights & f) != 0 ? 1 : 0;
-        }
+        // ALL CALLS INLINED
+//#if AGGR_INLINE
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//#endif
+//        internal int can_castle_CR_bit(CastleRight f)
+//        {
+//            return (st.castleRights & f) != 0 ? 1 : 0;
+//        }
 
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -338,7 +337,7 @@ namespace Portfish
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        internal Bitboard attacks_from_PAWN(Square s, Color c)
+        internal static Bitboard attacks_from_PAWN(Square s, Color c)
         {
             return Utils.StepAttacksBB[((c << 3) | PieceTypeC.PAWN)][s];
         }
@@ -402,7 +401,7 @@ namespace Portfish
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        internal Bitboard attacks_from_KING(Square s)
+        internal static Bitboard attacks_from_KING(Square s)
         {
             return Utils.StepAttacksBB_KING[s];
         }
@@ -410,7 +409,7 @@ namespace Portfish
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        internal Bitboard attacks_from_KNIGHT(Square s)
+        internal static Bitboard attacks_from_KNIGHT(Square s)
         {
             return Utils.StepAttacksBB_KNIGHT[s];
         }
@@ -428,7 +427,7 @@ namespace Portfish
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        internal Bitboard attacks_from(Piece p, Square s, Bitboard occ)
+        internal static Bitboard attacks_from(Piece p, Square s, Bitboard occ)
         {
             PieceType pieceType = Utils.type_of(p);
             if (pieceType == PieceTypeC.BISHOP) return Utils.bishop_attacks_bb(s, occ);
@@ -613,7 +612,7 @@ namespace Portfish
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        internal Score psq_delta(Piece piece, Square from, Square to)
+        internal static Score psq_delta(Piece piece, Square from, Square to)
         {
             return pieceSquareTable[piece][to] - pieceSquareTable[piece][from];
         }
@@ -651,15 +650,16 @@ namespace Portfish
             return startPosPly + st.pliesFromNull; // HACK
         }
 
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal bool opposite_bishops()
-        {
-            return pieceCount[ColorC.WHITE][PieceTypeC.BISHOP] == 1
-                && pieceCount[ColorC.BLACK][PieceTypeC.BISHOP] == 1
-                && Utils.opposite_colors(pieceList[ColorC.WHITE][PieceTypeC.BISHOP][0], pieceList[ColorC.BLACK][PieceTypeC.BISHOP][0]);
-        }
+        // ALL CALLS INLINED
+//#if AGGR_INLINE
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//#endif
+//        internal bool opposite_bishops()
+//        {
+//            return pieceCount[ColorC.WHITE][PieceTypeC.BISHOP] == 1
+//                && pieceCount[ColorC.BLACK][PieceTypeC.BISHOP] == 1
+//                && Utils.opposite_colors(pieceList[ColorC.WHITE][PieceTypeC.BISHOP][0], pieceList[ColorC.BLACK][PieceTypeC.BISHOP][0]);
+//        }
 
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -780,13 +780,6 @@ namespace Portfish
             : this()
         {
             copy(pos);
-        }
-
-        internal Position(Position pos, Thread t)
-            : this()
-        {
-            copy(pos);
-            thisThread = t;
         }
 
         internal Position(string f, bool c960, Thread t)
@@ -1150,17 +1143,17 @@ namespace Portfish
         /// time-critical paths.
         internal bool move_is_legal(Move m)
         {
-            MList mlist = MListBroker.GetObject();
+            MList mlist = MListBroker.GetObject(); mlist.pos = 0;
             Movegen.generate_legal(this, mlist.moves, ref mlist.pos);
             for (int i = 0; i < mlist.pos; i++)
             {
                 if (mlist.moves[i].move == m)
                 {
-                    MListBroker.Free(mlist);
+                    MListBroker.Free();
                     return true;
                 }
             }
-            MListBroker.Free(mlist);
+            MListBroker.Free();
             return false;
         }
 
@@ -1357,7 +1350,7 @@ namespace Portfish
             CheckInfo ci = CheckInfoBroker.GetObject();
             ci.CreateCheckInfo(this);
             do_move(m, newSt, ci, move_gives_check(m, ci));
-            CheckInfoBroker.Free(ci);
+            CheckInfoBroker.Free();
         }
 
         internal void do_move(Move m, StateInfo newSt, CheckInfo ci, bool moveIsCheck)
@@ -1939,7 +1932,7 @@ namespace Portfish
                 swapList[slIndex - 1] = Math.Min(-swapList[slIndex], swapList[slIndex - 1]);
 
             int retval = swapList[0];
-            SwapListBroker.Free(swap);
+            SwapListBroker.Free();
 
             return retval;
         }
@@ -2102,11 +2095,11 @@ namespace Portfish
             if (st.rule50 > 99)
             {
                 if (st.checkersBB == 0) return true;
-                MList mlist = MListBroker.GetObject();
+                MList mlist = MListBroker.GetObject(); mlist.pos = 0;
                 Position pos2 = this;
                 Movegen.generate_legal(pos2, mlist.moves, ref mlist.pos);
                 bool any = mlist.pos > 0;
-                MListBroker.Free(mlist);
+                MListBroker.Free();
                 if (any)
                 {
                     return true;

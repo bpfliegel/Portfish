@@ -84,7 +84,7 @@ namespace Portfish
                 CheckInfo ci = CheckInfoBroker.GetObject();
                 ci.CreateCheckInfo(pos);
                 bool givesCheck = pos.move_gives_check(m, ci);
-                CheckInfoBroker.Free(ci);
+                CheckInfoBroker.Free();
                 if (!givesCheck) return;
             }
 
@@ -375,7 +375,7 @@ namespace Portfish
             } while (b != 0);
 
             // Generate evasions for king, capture and non capture moves
-            b = pos.attacks_from_KING(ksq) & ~pos.pieces_C(us) & ~sliderAttacks;
+            b = Position.attacks_from_KING(ksq) & ~pos.pieces_C(us) & ~sliderAttacks;
             from = ksq;
             while (b != 0) { ms[mpos++].move = Utils.make_move(from, Utils.pop_1st_bit(ref b)); }
 
@@ -429,7 +429,7 @@ namespace Portfish
                 generate_castle(CastlingSideC.QUEEN_SIDE, true, pos, ms, ref mpos, us);
             }
 
-            CheckInfoBroker.Free(ci);
+            CheckInfoBroker.Free();
         }
 
         internal static void generate_quiet(Position pos, MoveStack[] ms, ref int mpos)

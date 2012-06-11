@@ -99,13 +99,9 @@ namespace Portfish
 
             do_sleep = loopType != ThreadLoopType.Main; // Avoid a race with start_searching()
 
-            ThreadHelper.lock_init(sleepLock);
-            ThreadHelper.cond_init(sleepCond);
-
             for (int j = 0; j < Constants.MAX_SPLITPOINTS_PER_THREAD; j++)
             {
                 splitPoints[j] = new SplitPoint();
-                ThreadHelper.lock_init(splitPoints[j].Lock);
             }
 
             ThreadPool.QueueUserWorkItem(this.StartThread, initEvent);
@@ -126,12 +122,6 @@ namespace Portfish
 
             do_exit = true; // Search must be already finished
             wake_up();
-
-            ThreadHelper.lock_destroy(sleepLock);
-            ThreadHelper.cond_destroy(sleepCond);
-
-            for (int j = 0; j < Constants.MAX_SPLITPOINTS_PER_THREAD; j++)
-                ThreadHelper.lock_destroy(splitPoints[j].Lock);
         }
 
         // Thread::wake_up() wakes up the thread, normally at the beginning of the search
@@ -407,7 +397,7 @@ namespace Portfish
 
                     pos.startState = null;
                     pos.st = null;
-                    PositionBroker.Free(pos);
+                    PositionBroker.Free();
                     LoopStackBroker.Free(ls);
                 }
             }
@@ -487,11 +477,7 @@ namespace Portfish
                 initEvents[i] = new ManualResetEvent(false);
             }
 
-            ThreadHelper.cond_init(sleepCond);
-            ThreadHelper.lock_init(splitLock);
-
             ThreadPool.QueueUserWorkItem(new WaitCallback(launch_threads), initEvents);
-
             WaitHandle.WaitAll(initEvents);
         }
 
@@ -512,9 +498,6 @@ namespace Portfish
             }
 
             timer.exit();
-
-            ThreadHelper.lock_destroy(splitLock);
-            ThreadHelper.cond_destroy(sleepCond);
         }
 
         // available_slave_exists() tries to find an idle thread which is available as
@@ -650,7 +633,7 @@ namespace Portfish
             Search.Limits = limits;
             Search.RootMoves.Clear();
 
-            MList mlist = MListBroker.GetObject();
+            MList mlist = MListBroker.GetObject(); mlist.pos = 0;
             Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
             for (int i = 0; i < mlist.pos; i++)
             {
@@ -660,7 +643,7 @@ namespace Portfish
                     Search.RootMoves.Add(new RootMove(move));
                 }
             }
-            MListBroker.Free(mlist);
+            MListBroker.Free();
 
             main_thread().do_sleep = false;
             main_thread().wake_up();
@@ -713,14 +696,6 @@ namespace Portfish
 
     internal static class ThreadHelper
     {
-        //#  define lock_init(x) InitializeCriticalSection(x)
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static void lock_init(object Lock)
-        {
-        }
-
         //#  define lock_grab(x) EnterCriticalSection(x)
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -737,30 +712,6 @@ namespace Portfish
         internal static void lock_release(object Lock)
         {
             System.Threading.Monitor.Exit(Lock);
-        }
-
-        //#  define lock_destroy(x) DeleteCriticalSection(x)
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static void lock_destroy(object Lock)
-        {
-        }
-
-        //#  define cond_init(x) { *x = CreateEvent(0, FALSE, FALSE, 0); }
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static void cond_init(object sleepCond)
-        {
-        }
-
-        //#  define cond_destroy(x) CloseHandle(*x)
-#if AGGR_INLINE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        internal static void cond_destroy(object sleepCond)
-        {
         }
 
         //#  define cond_signal(x) SetEvent(*x)

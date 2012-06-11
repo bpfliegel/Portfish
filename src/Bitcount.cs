@@ -29,7 +29,6 @@ namespace Portfish
         /// is 32 or 64 bits, and to the maximum number of nonzero bits.
         /// We also support hardware popcnt instruction. See Readme.txt
         /// on how to pgo compile with popcnt support.
-
 #if AGGR_INLINE
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif

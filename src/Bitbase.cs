@@ -45,7 +45,7 @@ namespace Portfish
             return KPKBitbase[idx / 32] & (Constants.UInt32One << (idx & 31));
         }
 
-        internal static void kpk_bitbase_init()
+        internal static void init()
         {
             Result[] db = new Result[IndexMax];
             KPKPosition pos = new KPKPosition();

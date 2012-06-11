@@ -82,14 +82,6 @@ namespace Portfish
                 return x.idx.CompareTo(y.idx);
             }
         }
-
-        internal sealed class UCIOptionNameComparer : IComparer<UCIOption>
-        {
-            int IComparer<UCIOption>.Compare(UCIOption x, UCIOption y)
-            {
-                return x.name.CompareTo(y.name);
-            }
-        }
     }
 
     /// 'On change' actions, triggered by an option's value change
@@ -126,7 +118,7 @@ namespace Portfish
 
         private Dictionary<string, UCIOption> o = new Dictionary<string, UCIOption>();
 
-        private int cpu_count()
+        private static int cpu_count()
         {
             int num_cpu;
 #if PORTABLE

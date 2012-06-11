@@ -28,18 +28,18 @@ namespace Portfish
             int i, brokerSize;
 
             // Reusing brokers
-            brokerSize = 40; for (i = 0; i < brokerSize; i++) { CheckInfoBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { CheckInfoBroker.Free(null); }
-            brokerSize = 4; for (i = 0; i < brokerSize; i++) { EvalInfoBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { EvalInfoBroker.Free(null); }
-            brokerSize = 4; for (i = 0; i < brokerSize; i++) { SwapListBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { SwapListBroker.Free(null); }
-            brokerSize = 36; for (i = 0; i < brokerSize; i++) { MovesSearchedBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { MovesSearchedBroker.Free(null); }
-            brokerSize = 8; for (i = 0; i < brokerSize; i++) { PositionBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { PositionBroker.Free(null); }
-            brokerSize = 4; for (i = 0; i < brokerSize; i++) { StateInfoArrayBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { StateInfoArrayBroker.Free(null); }
+            brokerSize = 40; for (i = 0; i < brokerSize; i++) { CheckInfoBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { CheckInfoBroker.Free(); }
+            brokerSize = 4; for (i = 0; i < brokerSize; i++) { EvalInfoBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { EvalInfoBroker.Free(); }
+            brokerSize = 4; for (i = 0; i < brokerSize; i++) { SwapListBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { SwapListBroker.Free(); }
+            brokerSize = 36; for (i = 0; i < brokerSize; i++) { MovesSearchedBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { MovesSearchedBroker.Free(); }
+            brokerSize = 8; for (i = 0; i < brokerSize; i++) { PositionBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { PositionBroker.Free(); }
+            brokerSize = 4; for (i = 0; i < brokerSize; i++) { StateInfoArrayBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { StateInfoArrayBroker.Free(); }
+            brokerSize = 4; for (i = 0; i < brokerSize; i++) { MListBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { MListBroker.Free(); }
+            brokerSize = 36; for (i = 0; i < brokerSize; i++) { StateInfoBroker.GetObject(); } for (i = 0; i < brokerSize; i++) { StateInfoBroker.Free(); }
 
             // Recycling brokers
-            brokerSize = 4; MList[] arrMList = new MList[brokerSize]; for (i = 0; i < brokerSize; i++) { arrMList[i] = MListBroker.GetObject(); } for (i = brokerSize - 1; i >= 0; i--) { MListBroker.Free(arrMList[i]); }
             brokerSize = 8; LoopStack[] arrLoopStack = new LoopStack[brokerSize]; for (i = 0; i < brokerSize; i++) { arrLoopStack[i] = LoopStackBroker.GetObject(); } for (i = brokerSize - 1; i >= 0; i--) { LoopStackBroker.Free(arrLoopStack[i]); }
             brokerSize = 40; MovePicker[] arrMovePicker = new MovePicker[brokerSize]; for (i = 0; i < brokerSize; i++) { arrMovePicker[i] = MovePickerBroker.GetObject(); } for (i = brokerSize - 1; i >= 0; i--) { MovePickerBroker.Free(arrMovePicker[i]); }
-            brokerSize = 36; StateInfo[] arrStateInfo = new StateInfo[brokerSize]; for (i = 0; i < brokerSize; i++) { arrStateInfo[i] = StateInfoBroker.GetObject(); } for (i = brokerSize - 1; i >= 0; i--) { StateInfoBroker.Free(arrStateInfo[i]); }
         }
 
         internal static string Report()
@@ -64,7 +64,7 @@ namespace Portfish
 
     #region Reusing brokers
 
-    internal static class CheckInfoBroker // Reusing
+    internal static class CheckInfoBroker
     {
         internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
         internal static readonly CheckInfo[][] _pool = new CheckInfo[Constants.BROKER_SLOTS][];
@@ -94,7 +94,7 @@ namespace Portfish
             return _pool[slotID][_cnt[slotID]++];
         }
 
-        internal static void Free(CheckInfo obj)
+        internal static void Free()
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
         }
@@ -111,7 +111,7 @@ namespace Portfish
         }
     }
 
-    internal static class EvalInfoBroker // Reusing
+    internal static class EvalInfoBroker
     {
         internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
         internal static readonly EvalInfo[][] _pool = new EvalInfo[Constants.BROKER_SLOTS][];
@@ -141,7 +141,7 @@ namespace Portfish
             return _pool[slotID][_cnt[slotID]++];
         }
 
-        internal static void Free(EvalInfo obj)
+        internal static void Free()
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
         }
@@ -158,7 +158,7 @@ namespace Portfish
         }
     }
 
-    internal static class SwapListBroker // Reusing
+    internal static class SwapListBroker
     {
         internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
         internal static readonly SwapList[][] _pool = new SwapList[Constants.BROKER_SLOTS][];
@@ -188,7 +188,7 @@ namespace Portfish
             return _pool[slotID][_cnt[slotID]++];
         }
 
-        internal static void Free(SwapList obj)
+        internal static void Free()
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
         }
@@ -205,7 +205,7 @@ namespace Portfish
         }
     }
 
-    internal static class MovesSearchedBroker // Reusing
+    internal static class MovesSearchedBroker
     {
         internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
         internal static readonly MovesSearched[][] _pool = new MovesSearched[Constants.BROKER_SLOTS][];
@@ -235,7 +235,7 @@ namespace Portfish
             return _pool[slotID][_cnt[slotID]++];
         }
 
-        internal static void Free(MovesSearched obj)
+        internal static void Free()
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
         }
@@ -252,7 +252,7 @@ namespace Portfish
         }
     }
 
-    internal static class StateInfoArrayBroker // Reusing
+    internal static class StateInfoArrayBroker
     {
         internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
         internal static readonly StateInfoArray[][] _pool = new StateInfoArray[Constants.BROKER_SLOTS][];
@@ -282,7 +282,7 @@ namespace Portfish
             return _pool[slotID][_cnt[slotID]++];
         }
 
-        internal static void Free(StateInfoArray obj)
+        internal static void Free()
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
         }
@@ -299,7 +299,7 @@ namespace Portfish
         }
     }
 
-    internal static class PositionBroker // Reusing
+    internal static class PositionBroker
     {
         internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
         internal static readonly Position[][] _pool = new Position[Constants.BROKER_SLOTS][];
@@ -329,7 +329,7 @@ namespace Portfish
             return _pool[slotID][_cnt[slotID]++];
         }
 
-        internal static void Free(Position obj)
+        internal static void Free()
         {
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
         }
@@ -346,11 +346,105 @@ namespace Portfish
         }
     }
 
+    internal static class MListBroker
+    {
+        internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
+        internal static readonly MList[][] _pool = new MList[Constants.BROKER_SLOTS][];
+
+        internal static void init()
+        {
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                _pool[i] = new MList[0];
+            }
+        }
+
+        internal static MList GetObject()
+        {
+            int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+            if (_cnt[slotID] == _pool[slotID].Length)
+            {
+                int poolLength = _pool[slotID].Length;
+                MList[] temp = new MList[poolLength + Constants.BrokerCapacity];
+                Array.Copy(_pool[slotID], temp, poolLength);
+                for (int i = 0; i < Constants.BrokerCapacity; i++)
+                {
+                    temp[poolLength + i] = new MList();
+                }
+                _pool[slotID] = temp;
+            }
+            return _pool[slotID][_cnt[slotID]++];
+        }
+
+        internal static void Free()
+        {
+            _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+        }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("MListBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
+        }
+    }
+
+    internal static class StateInfoBroker
+    {
+        internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
+        internal static readonly StateInfo[][] _pool = new StateInfo[Constants.BROKER_SLOTS][];
+
+        internal static void init()
+        {
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                _pool[i] = new StateInfo[0];
+            }
+        }
+
+        internal static StateInfo GetObject()
+        {
+            int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+            if (_cnt[slotID] == _pool[slotID].Length)
+            {
+                int poolLength = _pool[slotID].Length;
+                StateInfo[] temp = new StateInfo[poolLength + Constants.BrokerCapacity];
+                Array.Copy(_pool[slotID], temp, poolLength);
+                for (int i = 0; i < Constants.BrokerCapacity; i++)
+                {
+                    temp[poolLength + i] = new StateInfo();
+                }
+                _pool[slotID] = temp;
+            }
+            return _pool[slotID][_cnt[slotID]++];
+        }
+
+        internal static void Free()
+        {
+            _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+        }
+
+        internal static string Report()
+        {
+            StringBuilder sb = new StringBuilder();
+            int entryCount = 0;
+            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
+            {
+                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
+            }
+            return string.Format("StateInfoBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
+        }
+    }
+
     #endregion
 
     #region Recycling brokers
 
-    internal static class MovePickerBroker // Recycling
+    internal static class MovePickerBroker
     {
         internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
         internal static readonly MovePicker[][] _pool = new MovePicker[Constants.BROKER_SLOTS][];
@@ -398,55 +492,7 @@ namespace Portfish
         }
     }
 
-    internal static class StateInfoBroker // Recycling
-    {
-        internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
-        internal static readonly StateInfo[][] _pool = new StateInfo[Constants.BROKER_SLOTS][];
-
-        internal static void init()
-        {
-            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
-            {
-                _pool[i] = new StateInfo[0];
-            }
-        }
-
-        internal static StateInfo GetObject()
-        {
-            int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
-            if (_cnt[slotID] == _pool[slotID].Length)
-            {
-                int poolLength = _pool[slotID].Length;
-                StateInfo[] temp = new StateInfo[poolLength + Constants.BrokerCapacity];
-                Array.Copy(_pool[slotID], temp, poolLength);
-                for (int i = 0; i < Constants.BrokerCapacity; i++)
-                {
-                    temp[poolLength + i] = new StateInfo();
-                }
-                _pool[slotID] = temp;
-            }
-            return _pool[slotID][_cnt[slotID]++];
-        }
-
-        internal static void Free(StateInfo obj)
-        {
-            obj.Recycle();
-            _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
-        }
-
-        internal static string Report()
-        {
-            StringBuilder sb = new StringBuilder();
-            int entryCount = 0;
-            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
-            {
-                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
-            }
-            return string.Format("StateInfoBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
-        }
-    }
-
-    internal static class LoopStackBroker // Recycling
+    internal static class LoopStackBroker
     {
         internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
         internal static readonly LoopStack[][] _pool = new LoopStack[Constants.BROKER_SLOTS][];
@@ -491,54 +537,6 @@ namespace Portfish
                 if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
             }
             return string.Format("LoopStackBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
-        }
-    }
-
-    internal static class MListBroker // Recycling
-    {
-        internal static readonly UInt32[] _cnt = new UInt32[Constants.BROKER_SLOTS];
-        internal static readonly MList[][] _pool = new MList[Constants.BROKER_SLOTS][];
-
-        internal static void init()
-        {
-            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
-            {
-                _pool[i] = new MList[0];
-            }
-        }
-
-        internal static MList GetObject()
-        {
-            int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
-            if (_cnt[slotID] == _pool[slotID].Length)
-            {
-                int poolLength = _pool[slotID].Length;
-                MList[] temp = new MList[poolLength + Constants.BrokerCapacity];
-                Array.Copy(_pool[slotID], temp, poolLength);
-                for (int i = 0; i < Constants.BrokerCapacity; i++)
-                {
-                    temp[poolLength + i] = new MList();
-                }
-                _pool[slotID] = temp;
-            }
-            return _pool[slotID][_cnt[slotID]++];
-        }
-
-        internal static void Free(MList obj)
-        {
-            obj.Recycle();
-            _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
-        }
-
-        internal static string Report()
-        {
-            StringBuilder sb = new StringBuilder();
-            int entryCount = 0;
-            for (int i = 0; i < Constants.BROKER_SLOTS; i++)
-            {
-                if (_pool[i].Length > 0) { entryCount += _pool[i].Length; sb.Append("/").Append(_pool[i].Length); }
-            }
-            return string.Format("MListBroker: {0}{1}\r\n", entryCount, entryCount > 0 ? string.Format(" ({0})", sb.ToString().Substring(1)) : string.Empty);
         }
     }
 

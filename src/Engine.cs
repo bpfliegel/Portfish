@@ -25,9 +25,10 @@ namespace Portfish
             MovePickerBroker.init();
             StateInfoBroker.init();
 
-            Utils.InitLookups();
+            Utils.init();
+            Book.init();
             Position.init();
-            KPKPosition.kpk_bitbase_init();
+            KPKPosition.init();
             Endgame.init();
             Search.init();
             Evaluate.init();

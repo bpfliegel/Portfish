@@ -93,7 +93,7 @@ namespace Portfish
 
         #region Lookup init
 
-        internal static void InitLookups()
+        internal static void init()
         {
             for (int k = 0, i = 0; i < 8; i++)
             {
@@ -1092,18 +1092,18 @@ namespace Portfish
         internal static Move move_from_uci(Position pos, string str)
         {
             string strLowerPromotion = (str.Length == 5 ? str.Substring(0, 4) + str.Substring(4).ToLowerInvariant() : str);
-            MList mlist = MListBroker.GetObject();
+            MList mlist = MListBroker.GetObject(); mlist.pos = 0;
             Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
             for (int i = 0; i < mlist.pos; i++)
             {
                 if (strLowerPromotion == Utils.move_to_uci(mlist.moves[i].move, pos.chess960))
                 {
                     Move retval = mlist.moves[i].move;
-                    MListBroker.Free(mlist);
+                    MListBroker.Free();
                     return retval;
                 }
             }
-            MListBroker.Free(mlist);
+            MListBroker.Free();
             return MoveC.MOVE_NONE;
         }
 
@@ -1193,13 +1193,13 @@ namespace Portfish
             {
                 StateInfo st = new StateInfo();
                 pos.do_move(m, st);
-                MList mlist = MListBroker.GetObject();
+                MList mlist = MListBroker.GetObject(); mlist.pos = 0;
                 Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
                 san.Append(mlist.pos > 0 ? "+" : "#");
-                MListBroker.Free(mlist);
+                MListBroker.Free();
                 pos.undo_move(m);
             }
-            CheckInfoBroker.Free(ci);
+            CheckInfoBroker.Free();
 
             return san.ToString();
         }

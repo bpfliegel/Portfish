@@ -110,7 +110,7 @@ namespace Portfish
 
             do pos.undo_move(pv[--ply]); while (ply != 0);
 
-            StateInfoArrayBroker.Free(sia);
+            StateInfoArrayBroker.Free();
         }
 
         // insert_pv_in_tt() is called at the end of a search iteration, and inserts
@@ -146,7 +146,7 @@ namespace Portfish
 
             do pos.undo_move(pv[--ply]); while (ply != 0);
 
-            StateInfoArrayBroker.Free(sia);
+            StateInfoArrayBroker.Free();
         }
     };
 
@@ -320,14 +320,14 @@ namespace Portfish
             StateInfo st = new StateInfo();
             Int64 cnt = 0;
 
-            MList mlist = MListBroker.GetObject();
+            MList mlist = MListBroker.GetObject(); mlist.pos = 0;
             Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
 
             // At the last ply just return the number of moves (leaf nodes)
             if (depth == DepthC.ONE_PLY)
             {
                 int retval = mlist.pos;
-                MListBroker.Free(mlist);
+                MListBroker.Free();
                 return retval;
             }
 
@@ -340,18 +340,14 @@ namespace Portfish
                 cnt += perft(pos, depth - DepthC.ONE_PLY);
                 pos.undo_move(ms.move);
             }
-            CheckInfoBroker.Free(ci);
-
-            MListBroker.Free(mlist);
-
+            CheckInfoBroker.Free();
+            MListBroker.Free();
             return cnt;
         }
 
         /// Search::think() is the external interface to Stockfish's search, and is
         /// called by the main thread when the program receives the UCI 'go' command. It
         /// searches from RootPosition and at the end prints the "bestmove" to output.
-        static readonly Book book = new Book(); // Defined static to initialize the PRNG only once
-
         internal static void think()
         {
             Position pos = RootPosition;
@@ -374,7 +370,7 @@ namespace Portfish
 
             if ((bool.Parse(OptionMap.Instance["OwnBook"].v)) && (Limits.infinite == 0))
             {
-                Move bookMove = book.probe(pos, OptionMap.Instance["Book File"].v, bool.Parse(OptionMap.Instance["Best Book Move"].v));
+                Move bookMove = Book.probe(pos, OptionMap.Instance["Book File"].v, bool.Parse(OptionMap.Instance["Best Book Move"].v));
                 if ((bookMove != 0) && Utils.existRootMove(RootMoves, bookMove))
                 {
                     int bestpos = find(RootMoves, 0, RootMoves.Count, bookMove);
@@ -684,7 +680,7 @@ namespace Portfish
                  || pos.is_draw(false)
                  || ss[ssPos].ply > Constants.MAX_PLY) && !RootNode)
             {
-                MovesSearchedBroker.Free(ms);
+                MovesSearchedBroker.Free();
                 return ValueC.VALUE_DRAW;
             }
 
@@ -700,7 +696,7 @@ namespace Portfish
                 beta = Math.Min(Utils.mate_in(ss[ssPos].ply + 1), beta);
                 if (alpha >= beta)
                 {
-                    MovesSearchedBroker.Free(ms);
+                    MovesSearchedBroker.Free();
                     return alpha;
                 }
             }
@@ -733,7 +729,7 @@ namespace Portfish
                     ss[ssPos].killers0 = ttMove;
                 }
 
-                MovesSearchedBroker.Free(ms);
+                MovesSearchedBroker.Free();
                 return ttValue;
             }
 
@@ -779,7 +775,7 @@ namespace Portfish
                 {
                     // Logically we should return (v + razor_margin(depth)), but
                     // surprisingly this did slightly weaker in tests.
-                    MovesSearchedBroker.Free(ms);
+                    MovesSearchedBroker.Free();
                     return v;
                 }
             }
@@ -794,7 +790,7 @@ namespace Portfish
                 && refinedValue - futility_margin(depth, 0) >= beta
                 && (pos.non_pawn_material(pos.sideToMove) != 0))
             {
-                MovesSearchedBroker.Free(ms);
+                MovesSearchedBroker.Free();
                 return refinedValue - futility_margin(depth, 0);
             }
 
@@ -831,8 +827,8 @@ namespace Portfish
 
                     if (depth < 6 * DepthC.ONE_PLY)
                     {
-                        if (st != null) { StateInfoBroker.Free(st); }
-                        MovesSearchedBroker.Free(ms);
+                        if (st != null) { st.previous = null; StateInfoBroker.Free(); }
+                        MovesSearchedBroker.Free();
                         return nullValue;
                     }
 
@@ -843,8 +839,8 @@ namespace Portfish
 
                     if (v >= beta)
                     {
-                        if (st != null) { StateInfoBroker.Free(st); }
-                        MovesSearchedBroker.Free(ms);
+                        if (st != null) { st.previous = null; StateInfoBroker.Free(); }
+                        MovesSearchedBroker.Free();
                         return nullValue;
                     }
                 }
@@ -863,8 +859,8 @@ namespace Portfish
                         && threatMove != MoveC.MOVE_NONE
                         && connected_moves(pos, ss[ssPos - 1].currentMove, threatMove))
                     {
-                        if (st != null) { StateInfoBroker.Free(st); }
-                        MovesSearchedBroker.Free(ms);
+                        if (st != null) { st.previous = null; StateInfoBroker.Free(); }
+                        MovesSearchedBroker.Free();
                         return beta - 1;
                     }
                 }
@@ -903,16 +899,16 @@ namespace Portfish
                         pos.undo_move(move);
                         if (value >= rbeta)
                         {
-                            if (st != null) { StateInfoBroker.Free(st); }
-                            CheckInfoBroker.Free(ci2);
+                            if (st != null) { st.previous = null; StateInfoBroker.Free(); }
+                            CheckInfoBroker.Free();
                             MovePickerBroker.Free(mp2);
-                            MovesSearchedBroker.Free(ms);
+                            MovesSearchedBroker.Free();
                             return value;
                         }
                     }
                 }
 
-                CheckInfoBroker.Free(ci2);
+                CheckInfoBroker.Free();
                 MovePickerBroker.Free(mp2);
             }
 
@@ -1221,10 +1217,10 @@ namespace Portfish
             // If we are in a singular extension search then return a fail low score.
             if (moveCount == 0)
             {
-                if (st != null) { StateInfoBroker.Free(st); }
-                CheckInfoBroker.Free(ci);
+                if (st != null) { st.previous = null; StateInfoBroker.Free(); }
+                CheckInfoBroker.Free();
                 MovePickerBroker.Free(mp);
-                MovesSearchedBroker.Free(ms);
+                MovesSearchedBroker.Free();
                 return (excludedMove != 0) ? oldAlpha : inCheck ? Utils.mated_in(ss[ssPos].ply) : ValueC.VALUE_DRAW;
             }
 
@@ -1272,10 +1268,10 @@ namespace Portfish
 
             Debug.Assert(bestValue > -ValueC.VALUE_INFINITE && bestValue < ValueC.VALUE_INFINITE);
 
-            if (st != null) { StateInfoBroker.Free(st); }
-            CheckInfoBroker.Free(ci);
+            if (st != null) { st.previous = null; StateInfoBroker.Free(); }
+            CheckInfoBroker.Free();
             MovePickerBroker.Free(mp);
-            MovesSearchedBroker.Free(ms);
+            MovesSearchedBroker.Free();
 
             return bestValue;
         }
@@ -1464,8 +1460,8 @@ namespace Portfish
             // and no legal moves were found, it is checkmate.
             if (inCheck && bestValue == -ValueC.VALUE_INFINITE)
             {
-                if (st != null) { StateInfoBroker.Free(st); }
-                CheckInfoBroker.Free(ci);
+                if (st != null) { st.previous = null; StateInfoBroker.Free(); }
+                CheckInfoBroker.Free();
                 MovePickerBroker.Free(mp);
                 return Utils.mated_in(ss[ssPos].ply); // Plies to mate from the root
             }
@@ -1479,8 +1475,8 @@ namespace Portfish
 
             Debug.Assert(bestValue > -ValueC.VALUE_INFINITE && bestValue < ValueC.VALUE_INFINITE);
 
-            if (st != null) { StateInfoBroker.Free(st); }
-            CheckInfoBroker.Free(ci);
+            if (st != null) { st.previous = null; StateInfoBroker.Free(); }
+            CheckInfoBroker.Free();
             MovePickerBroker.Free(mp);
 
             return bestValue;
@@ -1500,12 +1496,12 @@ namespace Portfish
             to = Utils.to_sq(move);
             them = Utils.flip_C(pos.sideToMove);
             ksq = pos.king_square(them);
-            kingAtt = pos.attacks_from_KING(ksq);
+            kingAtt = Position.attacks_from_KING(ksq);
             pc = pos.piece_moved(move);
 
             occ = pos.occupied_squares ^ Utils.SquareBB[from] ^ Utils.SquareBB[ksq];
-            oldAtt = pos.attacks_from(pc, from, occ);
-            newAtt = pos.attacks_from(pc, to, occ);
+            oldAtt = Position.attacks_from(pc, from, occ);
+            newAtt = Position.attacks_from(pc, to, occ);
 
             // Rule 1. Checks which give opponent's king at most one escape square are dangerous
             b = kingAtt & ~pos.pieces_C(them) & ~newAtt & ~(1UL << to);
@@ -1574,7 +1570,7 @@ namespace Portfish
                 &&
                 (Utils.bit_is_set(Utils.between_bb(t1, ksq), f2) != 0)
                 &&
-                (Utils.bit_is_set(pos.attacks_from(p1, t1, Utils.xor_bit(pos.occupied_squares, f2)), ksq) != 0)
+                (Utils.bit_is_set(Position.attacks_from(p1, t1, Utils.xor_bit(pos.occupied_squares, f2)), ksq) != 0)
                 )
                 return true;
 
