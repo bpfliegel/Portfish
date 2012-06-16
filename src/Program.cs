@@ -19,8 +19,14 @@ namespace Portfish
 
     class Program
     {
+        static byte[] inputBuffer = new byte[8192];
+
         static void Main(string[] args)
         {
+            // Setup an 8k inputBuffer because really long UCI strings were getting truncated
+            Stream inputStream = Console.OpenStandardInput(inputBuffer.Length);
+            Console.SetIn(new StreamReader(inputStream, Encoding.UTF7, false, inputBuffer.Length));
+
             IPlug cp = (IPlug)new ConsolePlug();
             Plug.Init(cp);
 
