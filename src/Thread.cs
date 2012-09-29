@@ -25,7 +25,9 @@ using NodeType = System.Int32;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+#if WINDOWS_RT
 using Windows.System.Threading;
+#endif
 
 namespace Portfish
 {

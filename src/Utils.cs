@@ -1022,13 +1022,22 @@ namespace Portfish
 
         internal static string engine_info(bool to_uci)
         {
-            // Get current assembly
+#if WINDOWS_RT
+            // Assembly and file version
             Assembly assembly = typeof(Engine).GetTypeInfo().Assembly;
-
-            // File version
             AssemblyFileVersionAttribute fileVersionRaw = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
             Version fileVersion = new Version(fileVersionRaw.Version);
-
+#else
+			// Assembly and file version
+			Assembly assembly = Assembly.GetExecutingAssembly();
+			Version fileVersion = null;
+            object[] attribs = assembly.GetCustomAttributes(typeof(AssemblyFileVersionAttribute), false);
+            if (attribs.Length > 0)
+            {
+                AssemblyFileVersionAttribute fileVersionRaw = (AssemblyFileVersionAttribute)(attribs[0]);
+                fileVersion = new Version(fileVersionRaw.Version);
+            }
+#endif
             // Extract version/build date
             string fullName = assembly.FullName;
             int vspos = fullName.IndexOf("Version=");
