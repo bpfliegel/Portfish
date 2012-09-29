@@ -121,10 +121,13 @@ namespace Portfish
         private static int cpu_count()
         {
             int num_cpu;
-#if PORTABLE
+
+#if WINDOWS_RT
+            num_cpu = Environment.ProcessorCount;
+#elif PORTABLE
             num_cpu = Constants.NumberOfCPUs;
 #else
-            num_cpu=Environment.ProcessorCount;
+            num_cpu = Environment.ProcessorCount;
 #endif
             return Math.Min(num_cpu, Constants.MAX_THREADS);
         }
