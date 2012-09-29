@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Portfish
 {
-    public class Engine
+    public sealed class Engine
     {
         public void Run(object arguments)
         {

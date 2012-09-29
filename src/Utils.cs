@@ -1025,12 +1025,16 @@ namespace Portfish
 #if WINDOWS_RT
             // Assembly and file version
             Assembly assembly = typeof(Engine).GetTypeInfo().Assembly;
+            Version fileVersion = null;
             AssemblyFileVersionAttribute fileVersionRaw = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
-            Version fileVersion = new Version(fileVersionRaw.Version);
+            if (fileVersionRaw != null)
+            {
+                fileVersion = new Version(fileVersionRaw.Version);
+            }
 #else
 			// Assembly and file version
 			Assembly assembly = Assembly.GetExecutingAssembly();
-			Version fileVersion = null;
+            Version fileVersion = null;
             object[] attribs = assembly.GetCustomAttributes(typeof(AssemblyFileVersionAttribute), false);
             if (attribs.Length > 0)
             {

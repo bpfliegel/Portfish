@@ -107,7 +107,14 @@ namespace Portfish
                 splitPoints[j] = new SplitPoint();
             }
 
+#if WINDOWS_RT
+            Windows.System.Threading.ThreadPool.RunAsync((sender) =>
+            {
+                StartThread(initEvent);
+            }, Windows.System.Threading.WorkItemPriority.Normal);
+#else
             ThreadPool.QueueUserWorkItem(this.StartThread, initEvent);
+#endif
         }
 
         internal void StartThread(object state)
@@ -480,7 +487,14 @@ namespace Portfish
                 initEvents[i] = new ManualResetEvent(false);
             }
 
+#if WINDOWS_RT
+            Windows.System.Threading.ThreadPool.RunAsync((sender) =>
+            {
+                launch_threads(initEvents);
+            }, Windows.System.Threading.WorkItemPriority.Normal);
+#else
             ThreadPool.QueueUserWorkItem(new WaitCallback(launch_threads), initEvents);
+#endif
             WaitHandle.WaitAll(initEvents);
         }
 
