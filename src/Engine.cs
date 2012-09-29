@@ -26,7 +26,10 @@ namespace Portfish
             StateInfoBroker.init();
 
             Utils.init();
+#if WINDOWS_RT
+#else
             Book.init();
+#endif
             Position.init();
             KPKPosition.init();
             Endgame.init();

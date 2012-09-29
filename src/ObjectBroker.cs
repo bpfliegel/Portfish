@@ -79,7 +79,11 @@ namespace Portfish
 
         internal static CheckInfo GetObject()
         {
+#if WINDOWS_RT
+            int slotID = Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK;
+#else
             int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+#endif
             if (_cnt[slotID] == _pool[slotID].Length)
             {
                 int poolLength = _pool[slotID].Length;
@@ -96,7 +100,11 @@ namespace Portfish
 
         internal static void Free()
         {
+#if WINDOWS_RT
+            _cnt[Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#else
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#endif
         }
 
         internal static string Report()
@@ -126,7 +134,11 @@ namespace Portfish
 
         internal static EvalInfo GetObject()
         {
+#if WINDOWS_RT
+            int slotID = Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK;
+#else
             int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+#endif
             if (_cnt[slotID] == _pool[slotID].Length)
             {
                 int poolLength = _pool[slotID].Length;
@@ -143,7 +155,11 @@ namespace Portfish
 
         internal static void Free()
         {
+#if WINDOWS_RT
+            _cnt[Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#else
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#endif
         }
 
         internal static string Report()
@@ -173,7 +189,11 @@ namespace Portfish
 
         internal static SwapList GetObject()
         {
+#if WINDOWS_RT
+            int slotID = Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK;
+#else
             int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+#endif
             if (_cnt[slotID] == _pool[slotID].Length)
             {
                 int poolLength = _pool[slotID].Length;
@@ -190,7 +210,11 @@ namespace Portfish
 
         internal static void Free()
         {
+#if WINDOWS_RT
+            _cnt[Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#else
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#endif
         }
 
         internal static string Report()
@@ -220,7 +244,11 @@ namespace Portfish
 
         internal static MovesSearched GetObject()
         {
+#if WINDOWS_RT
+            int slotID = Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK;
+#else
             int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+#endif
             if (_cnt[slotID] == _pool[slotID].Length)
             {
                 int poolLength = _pool[slotID].Length;
@@ -237,7 +265,11 @@ namespace Portfish
 
         internal static void Free()
         {
+#if WINDOWS_RT
+            _cnt[Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#else
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#endif
         }
 
         internal static string Report()
@@ -267,7 +299,11 @@ namespace Portfish
 
         internal static StateInfoArray GetObject()
         {
+#if WINDOWS_RT
+            int slotID = Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK;
+#else
             int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+#endif
             if (_cnt[slotID] == _pool[slotID].Length)
             {
                 int poolLength = _pool[slotID].Length;
@@ -284,7 +320,11 @@ namespace Portfish
 
         internal static void Free()
         {
+#if WINDOWS_RT
+            _cnt[Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#else
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#endif
         }
 
         internal static string Report()
@@ -314,7 +354,11 @@ namespace Portfish
 
         internal static Position GetObject()
         {
+#if WINDOWS_RT
+            int slotID = Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK;
+#else
             int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+#endif
             if (_cnt[slotID] == _pool[slotID].Length)
             {
                 int poolLength = _pool[slotID].Length;
@@ -331,7 +375,11 @@ namespace Portfish
 
         internal static void Free()
         {
+#if WINDOWS_RT
+            _cnt[Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#else
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#endif
         }
 
         internal static string Report()
@@ -361,7 +409,11 @@ namespace Portfish
 
         internal static MList GetObject()
         {
+#if WINDOWS_RT
+            int slotID = Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK;
+#else
             int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+#endif
             if (_cnt[slotID] == _pool[slotID].Length)
             {
                 int poolLength = _pool[slotID].Length;
@@ -378,7 +430,11 @@ namespace Portfish
 
         internal static void Free()
         {
+#if WINDOWS_RT
+            _cnt[Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#else
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#endif
         }
 
         internal static string Report()
@@ -408,7 +464,11 @@ namespace Portfish
 
         internal static StateInfo GetObject()
         {
+#if WINDOWS_RT
+            int slotID = Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK;
+#else
             int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+#endif
             if (_cnt[slotID] == _pool[slotID].Length)
             {
                 int poolLength = _pool[slotID].Length;
@@ -425,7 +485,11 @@ namespace Portfish
 
         internal static void Free()
         {
+#if WINDOWS_RT
+            _cnt[Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#else
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#endif
         }
 
         internal static string Report()
@@ -459,7 +523,11 @@ namespace Portfish
 
         internal static MovePicker GetObject()
         {
+#if WINDOWS_RT
+            int slotID = Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK;
+#else
             int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+#endif
             if (_cnt[slotID] == _pool[slotID].Length)
             {
                 int poolLength = _pool[slotID].Length;
@@ -477,7 +545,11 @@ namespace Portfish
         internal static void Free(MovePicker obj)
         {
             obj.Recycle();
+#if WINDOWS_RT
+            _cnt[Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#else
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#endif
         }
 
         internal static string Report()
@@ -507,7 +579,11 @@ namespace Portfish
 
         internal static LoopStack GetObject()
         {
+#if WINDOWS_RT
+            int slotID = Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK;
+#else
             int slotID = System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK;
+#endif
             if (_cnt[slotID] == _pool[slotID].Length)
             {
                 int poolLength = _pool[slotID].Length;
@@ -525,7 +601,11 @@ namespace Portfish
         internal static void Free(LoopStack obj)
         {
             obj.Recycle();
+#if WINDOWS_RT
+            _cnt[Environment.CurrentManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#else
             _cnt[System.Threading.Thread.CurrentThread.ManagedThreadId & Constants.BROKER_SLOT_MASK]--;
+#endif
         }
 
         internal static string Report()

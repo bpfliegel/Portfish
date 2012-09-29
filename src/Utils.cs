@@ -1015,22 +1015,19 @@ namespace Portfish
         #region Engine info
 
         /// engine_info() returns the full name of the current Stockfish version.
-        /// This will be either "Stockfish YYMMDD" (where YYMMDD is the date when
-        /// the program was compiled) or "Stockfish <version number>", depending
+        /// This will be either "Portfish YYMMDD" (where YYMMDD is the date when
+        /// the program was compiled) or "Portfish <version number>", depending
         /// on whether Version is empty.
         internal static string engine_info() { return engine_info(false); }
 
         internal static string engine_info(bool to_uci)
         {
-            // Extract file version
-            Version fileVersion = null;
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            object[] attribs = assembly.GetCustomAttributes(typeof(AssemblyFileVersionAttribute), false);
-            if (attribs.Length > 0)
-            {
-                AssemblyFileVersionAttribute fileVersionRaw = (AssemblyFileVersionAttribute)(attribs[0]);
-                fileVersion = new Version(fileVersionRaw.Version);
-            }
+            // Get current assembly
+            Assembly assembly = typeof(Engine).GetTypeInfo().Assembly;
+
+            // File version
+            AssemblyFileVersionAttribute fileVersionRaw = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
+            Version fileVersion = new Version(fileVersionRaw.Version);
 
             // Extract version/build date
             string fullName = assembly.FullName;

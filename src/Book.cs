@@ -22,6 +22,12 @@ using TracedType = System.Int32;
 using NodeType = System.Int32;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+
+// No book support for Windows RT in the first version
+#if WINDOWS_RT
+   
+#else
 
 namespace Portfish
 {
@@ -554,3 +560,5 @@ namespace Portfish
         }
     }
 }
+
+#endif

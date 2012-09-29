@@ -368,6 +368,8 @@ namespace Portfish
                 goto finalize;
             }
 
+            #if WINDOWS_RT
+            #else
             if ((bool.Parse(OptionMap.Instance["OwnBook"].v)) && (Limits.infinite == 0))
             {
                 Move bookMove = Book.probe(pos, OptionMap.Instance["Book File"].v, bool.Parse(OptionMap.Instance["Best Book Move"].v));
@@ -380,6 +382,7 @@ namespace Portfish
                     goto finalize;
                 }
             }
+            #endif
 
             UCIMultiPV = Int32.Parse(OptionMap.Instance["MultiPV"].v);
             SkillLevel = Int32.Parse(OptionMap.Instance["Skill Level"].v);
