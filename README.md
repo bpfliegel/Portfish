@@ -3,6 +3,8 @@ Portfish
 
 Portfish - .Net port of Stockfish (UCI chess engine)
 
+Now with Windows RT support!
+
 Latest versions could be downloaded from: https://github.com/downloads/bpfliegel/Portfish/PortfishLatestRelease.zip
 
 0. Introduction
