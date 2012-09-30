@@ -108,10 +108,7 @@ namespace Portfish
             }
 
 #if WINDOWS_RT
-            Windows.System.Threading.ThreadPool.RunAsync((sender) =>
-            {
-                StartThread(initEvent);
-            }, Windows.System.Threading.WorkItemPriority.Normal);
+            Windows.Foundation.IAsyncAction action = Windows.System.Threading.ThreadPool.RunAsync(delegate { StartThread(initEvent); }, WorkItemPriority.Normal);
 #else
             ThreadPool.QueueUserWorkItem(this.StartThread, initEvent);
 #endif
@@ -488,10 +485,7 @@ namespace Portfish
             }
 
 #if WINDOWS_RT
-            Windows.System.Threading.ThreadPool.RunAsync((sender) =>
-            {
-                launch_threads(initEvents);
-            }, Windows.System.Threading.WorkItemPriority.Normal);
+            Windows.Foundation.IAsyncAction action = Windows.System.Threading.ThreadPool.RunAsync(delegate { launch_threads(initEvents); }, WorkItemPriority.Normal);
 #else
             ThreadPool.QueueUserWorkItem(new WaitCallback(launch_threads), initEvents);
 #endif

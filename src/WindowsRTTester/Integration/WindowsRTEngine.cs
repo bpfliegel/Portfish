@@ -23,13 +23,12 @@ namespace WindowsRTTester
 
         public static void StartEngine()
         {
+            // Initialize the plug, through what we will communicate with the engine
             _thePlug = new WindowsRTPlug();
             Plug.Init(_thePlug);
 
-            Windows.System.Threading.ThreadPool.RunAsync((sender) =>
-            {
-                new Engine().Run(new string[] {});
-            }, Windows.System.Threading.WorkItemPriority.Normal);
+            // Run the engine in async mode
+            Windows.Foundation.IAsyncAction action = Windows.System.Threading.ThreadPool.RunAsync(delegate { new Engine().Run(new string[] { }); }, WorkItemPriority.Normal);
         }
     }
 }
