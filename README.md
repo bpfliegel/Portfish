@@ -12,7 +12,7 @@ Latest versions could be downloaded from: https://github.com/downloads/bpfliegel
 
 Portfish is the .Net port of Stockfish, functionally equal to Stockfish 2012 may 27, commit 0412f4a1ee.
 All features of the original version are present, except search and debug logging is stripped.
-The fastest builds are 4.0 x64 and 4.5 beta x64.
+The fastest builds are 4.0 x64 and 4.5 x64.
 
 
 1. Motivation
@@ -54,8 +54,8 @@ Portfish for portable platforms (Silverlight, Windows Phone).
 Portfish was compiled with Visual Studio version 10 and 11 beta for the following framework versions:
 - .Net FW 2.0 (x86,x64)
 - .Net FW 4.0 (x86,x64)
-- .Net FW 4.5 beta (x86,x64)
-- Visual Studio 11 beta portable project
+- .Net FW 4.5 (x86,x64)
+- Visual Studio 2012 portable project
 
 It was not yet compiled and tested with Mono, would be happy to receive feedback on that.
 
@@ -64,21 +64,25 @@ When compiling yourself, one should be careful about the following:
 a) Compilation directives:
 - X64 - bitboard operations are optimized for x64
 - PORTABLE - no file system operations
+- WINDOWS_RT - Windows RT compatible mode (no book support for now)
 - AGGR_INLINE - Visual Studio 11 beta feature to mark methods for aggressive inlining.
+To compile for Windows RT, please use both PORTABLE and WINDOWS_RT (besides NETFX_CORE) and other directives if you wish.
 
 b) Constants defined in Constants.cs
 - MaterialTableSize and PawnTableSize - make it small if compiling for e.g. mobile
 - NumberOfCPUs - when compiling a portable edition, there is no way to count the number of CPUs,
 this constant should be set for the correct number of CPUs.
+(not needed for Windows RT)
 
 c) Hash size
 - Default or adjusted size of the transposition table (UciOptions.cs)
 
 d) 'Optimize code' checkbox...
 
-e) For mobile platforms one should create an IPlug implementation to be able
+e) For mobile platforms and Windows RT one should create an IPlug implementation to be able
 to communicate through UCI and launch the engine in the same way as presented
 in Program.cs.
+The WindowsRT solution has such a sample implementation.
 
 
 5. Terms of use
