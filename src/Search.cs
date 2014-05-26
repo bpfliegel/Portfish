@@ -345,6 +345,36 @@ namespace Portfish
             return cnt;
         }
 
+        // Search::validmoves() will return the list of all valid moves for a 'square' in UCI notation - all valid moves for the piece occupying that square
+        // The list will be empty if no square is given or there is no piece on that square or the piece have no possible moves
+        internal static void validmoves(Position pos, Stack<string> stack)
+        {
+            if (stack.Count > 0)
+            {
+                string squareFromString = stack.Pop();
+
+                StateInfo st = new StateInfo();
+                MList mlist = MListBroker.GetObject(); mlist.pos = 0;
+                Movegen.generate_legal(pos, mlist.moves, ref mlist.pos);
+
+                bool firstOne = true;
+                for (int i = 0; i < mlist.pos; ++i)
+                {
+                    MoveStack ms = mlist.moves[i];
+                    Move m = ms.move;
+                    Square from = ((m >> 6) & 0x3F);
+                    if (Utils.square_to_string(from) == squareFromString)
+                    {
+                        if (!firstOne) { Plug.Write(" "); }
+                        Plug.Write(Utils.move_to_uci(m, false));
+                        firstOne = false;
+                    }
+                }
+                MListBroker.Free();
+            }
+            Plug.Write(Constants.endl);
+        }
+
         /// Search::think() is the external interface to Stockfish's search, and is
         /// called by the main thread when the program receives the UCI 'go' command. It
         /// searches from RootPosition and at the end prints the "bestmove" to output.

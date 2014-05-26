@@ -98,6 +98,10 @@ namespace Portfish
                 {
                     set_option(stack);
                 }
+                else if (token == "validmoves")
+                {
+                    Search.validmoves(pos, stack);
+                }
                 else if (token == "d")
                 {
                     pos.print(0);
