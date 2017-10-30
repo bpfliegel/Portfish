@@ -680,7 +680,7 @@ namespace Portfish
                                 (((((0xAA55AA55AA55AA55UL & Utils.SquareBB[s]) != 0) ? 0xAA55AA55AA55AA55UL : ~0xAA55AA55AA55AA55UL) & (pos.byTypeBB[PieceTypeC.BISHOP] & pos.byColorBB[Them])) == 0)
                                 )
                             {
-                                bonus += bonus + bonus / 2;
+                                bonus += bonus;
                             }
                             else
                             {
